@@ -1,0 +1,26 @@
+﻿CREATE TABLE [forge].[sub_order_line_task] (
+    [task_id]                 UNIQUEIDENTIFIER NOT NULL,
+    [order_line_id]           UNIQUEIDENTIFIER NULL,
+    [movement_type_id]        INT              NULL,
+    [item_uom_id]             UNIQUEIDENTIFIER NULL,
+    [quantity]                DECIMAL (10, 2)  NULL,
+    [actual_quantity]         DECIMAL (10, 2)  NULL,
+    [source_location_id]      UNIQUEIDENTIFIER NULL,
+    [destination_location_id] UNIQUEIDENTIFIER NULL,
+    [task_state_id]           INT              NULL,
+    [assigned_to_user_id]     UNIQUEIDENTIFIER NULL,
+    [priority]                INT              NULL,
+    [validation_type_id]      INT              NULL,
+    [date_created_utc]        DATETIME         NULL,
+    [date_assigned_utc]       DATETIME         NULL,
+    [date_started_utc]        DATETIME         NULL,
+    [date_completed_utc]      DATETIME         NULL,
+    [notes]                   VARCHAR (500)    NULL,
+    PRIMARY KEY CLUSTERED ([task_id] ASC),
+    FOREIGN KEY ([item_uom_id]) REFERENCES [forge].[item_uom] ([item_uom_id]),
+    FOREIGN KEY ([movement_type_id]) REFERENCES [forge].[movement_type] ([movement_type_id]),
+    FOREIGN KEY ([order_line_id]) REFERENCES [forge].[order_line] ([order_line_id]),
+    FOREIGN KEY ([task_state_id]) REFERENCES [forge].[task_state] ([task_state_id]),
+    FOREIGN KEY ([validation_type_id]) REFERENCES [forge].[validation_type] ([validation_type_id])
+);
+
