@@ -5,7 +5,7 @@
 CREATE PROCEDURE auth.sp_upsert_user_role_mapping
 (
     @p_record_id INT = NULL,
-    @p_created_by_user_id UNIQUEIDENTIFIER,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
     -- Table-specific columns
@@ -22,6 +22,10 @@ CREATE PROCEDURE auth.sp_upsert_user_role_mapping
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
 
     DECLARE @l_log_id UNIQUEIDENTIFIER = ISNULL(@p_loggingid, NEWID());
     DECLARE @l_exists BIT = 0;

@@ -1,20 +1,19 @@
-﻿
-/***************************************************************************************
+﻿/***************************************************************************************
   Procedure: sp_upsert_inventory_count
   PK: inventory_count_id
 ***************************************************************************************/
 CREATE PROCEDURE forge.sp_upsert_inventory_count
 (
     @p_record_id UNIQUEIDENTIFIER = NULL,
-    @p_created_by_user_id UNIQUEIDENTIFIER,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
     -- Table-specific columns
     @p_inventory_document_id UNIQUEIDENTIFIER,
     @p_storage_location_id UNIQUEIDENTIFIER,
     @p_item_uom_id UNIQUEIDENTIFIER,
-    @p_expected_quantity DECIMAL(10,2),
-    @p_counted_quantity DECIMAL(10,2),
+    @p_expected_quantity INT,
+    @p_counted_quantity INT,
     @p_count_status VARCHAR(50),
     @p_counted_by_user_id UNIQUEIDENTIFIER,
     @p_validated_by_user_id UNIQUEIDENTIFIER,
@@ -29,6 +28,10 @@ CREATE PROCEDURE forge.sp_upsert_inventory_count
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
 
     DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
     DECLARE @l_exists BIT = 0;

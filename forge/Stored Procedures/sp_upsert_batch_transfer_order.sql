@@ -1,7 +1,4 @@
-﻿
-
-
-/***************************************************************************************
+﻿/***************************************************************************************
   Procedure: sp_upsert_batch_transfer_order
   Composite PK: (batch_id, transfer_order_id)
 ***************************************************************************************/
@@ -9,7 +6,7 @@ CREATE PROCEDURE forge.sp_upsert_batch_transfer_order
 (
     @p_batch_id UNIQUEIDENTIFIER,
     @p_transfer_order_id UNIQUEIDENTIFIER,
-    @p_created_by_user_id UNIQUEIDENTIFIER,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
     @p_return_result_ok BIT OUTPUT,
     @p_return_result_message NVARCHAR(MAX) OUTPUT
@@ -17,6 +14,10 @@ CREATE PROCEDURE forge.sp_upsert_batch_transfer_order
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
 
     DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
     DECLARE @l_exists BIT = 0;

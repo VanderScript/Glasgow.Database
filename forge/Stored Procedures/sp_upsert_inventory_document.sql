@@ -2,7 +2,7 @@
 (
     -- Procedure-level control
     @p_record_id UNIQUEIDENTIFIER = NULL,      -- PK for inventory_document
-    @p_caller_user_id UNIQUEIDENTIFIER,       -- The user executing this procedure
+    @p_caller_user_id UNIQUEIDENTIFIER = NULL, -- The user executing this procedure
     @p_is_delete BIT = 0,                     -- Add/Update if 0, Delete if 1
 
     -- Table columns
@@ -22,6 +22,10 @@
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    -- Default to NONE user if no caller user ID is provided
+    IF @p_caller_user_id IS NULL
+        SET @p_caller_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
 
     /***************************************************************************
      * Local variable declarations

@@ -1,12 +1,11 @@
-﻿
-/***************************************************************************************
+﻿/***************************************************************************************
   Procedure: sp_upsert_fill_method
   PK: fill_method_id (INT)
 ***************************************************************************************/
 CREATE PROCEDURE forge.sp_upsert_fill_method
 (
     @p_record_id INT = NULL,
-    @p_created_by_user_id UNIQUEIDENTIFIER,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
     -- Table-specific columns
@@ -20,6 +19,10 @@ CREATE PROCEDURE forge.sp_upsert_fill_method
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
 
     DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
     DECLARE @l_exists BIT = 0;

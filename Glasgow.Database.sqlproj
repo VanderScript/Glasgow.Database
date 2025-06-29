@@ -232,6 +232,10 @@
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
+    <Build Include="auth\Stored Procedures\sp_upsert_roles.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
     <Build Include="forge\Tables\fill_method.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
@@ -304,10 +308,6 @@
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
-    <Build Include="forge\Tables\inventory.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
     <Build Include="forge\Tables\fulfillment_method.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
@@ -345,10 +345,6 @@
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
     <Build Include="forge\Stored Procedures\sp_upsert_sub_order_line_task.sql">
-      <AnsiNulls>On</AnsiNulls>
-      <QuotedIdentifier>On</QuotedIdentifier>
-    </Build>
-    <Build Include="forge\Stored Procedures\sp_upsert_inventory.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
@@ -404,6 +400,14 @@
     <Build Include="Security\forge.sql" />
     <Build Include="Security\auth.sql" />
     <Build Include="Security\Permissions.sql" />
+    <Build Include="forge\Tables\stock.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
+    <Build Include="forge\Stored Procedures\sp_upsert_stock.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

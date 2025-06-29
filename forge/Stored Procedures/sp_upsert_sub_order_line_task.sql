@@ -5,7 +5,7 @@
 CREATE PROCEDURE forge.sp_upsert_sub_order_line_task
 (
     @p_record_id UNIQUEIDENTIFIER = NULL,
-    @p_created_by_user_id UNIQUEIDENTIFIER,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
     -- Table-specific columns
@@ -36,6 +36,10 @@ BEGIN
     DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
     DECLARE @l_exists BIT = 0;
     DECLARE @l_action_type_id INT;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
 
     IF @p_record_id IS NOT NULL
        AND EXISTS(SELECT 1 FROM forge.sub_order_line_task WHERE task_id = @p_record_id)
