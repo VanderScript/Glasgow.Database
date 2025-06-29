@@ -9,13 +9,13 @@
     [rack]                   VARCHAR (50)     NULL,
     [level]                  VARCHAR (50)     NULL,
     [position]               VARCHAR (50)     NULL,
-    [status_id]              INT              NULL,
+    [storage_location_status_id]              INT              NULL,
     [capacity_volume]        DECIMAL (10, 2)  NULL,
     [capacity_weight]        DECIMAL (10, 2)  NULL,
     [location_definition_id] UNIQUEIDENTIFIER NULL,
     PRIMARY KEY CLUSTERED ([storage_location_id] ASC),
     FOREIGN KEY ([location_type_id]) REFERENCES [forge].[storage_location_type] ([location_type_id]),
-    FOREIGN KEY ([status_id]) REFERENCES [forge].[storage_location_status] ([status_id]),
-    CONSTRAINT [FK_storage_location_definition] FOREIGN KEY ([location_definition_id]) REFERENCES [forge].[location_definition] ([location_definition_id])
+    CONSTRAINT [FK_storage_location_definition] FOREIGN KEY ([location_definition_id]) REFERENCES [forge].[location_definition] ([location_definition_id]),
+    CONSTRAINT [FK_storage_location_status] FOREIGN KEY ([storage_location_status_id]) REFERENCES [forge].[storage_location_status] ([storage_location_status_id])
 );
 

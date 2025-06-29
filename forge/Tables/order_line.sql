@@ -16,7 +16,7 @@
     PRIMARY KEY CLUSTERED ([order_line_id] ASC),
     FOREIGN KEY ([item_uom_id]) REFERENCES [forge].[item_uom] ([item_uom_id]),
     FOREIGN KEY ([movement_type_id]) REFERENCES [forge].[movement_type] ([movement_type_id]),
-    FOREIGN KEY ([status_id]) REFERENCES [forge].[transfer_order_status] ([status_id]),
+    FOREIGN KEY ([status_id]) REFERENCES [forge].[transfer_order_status] ([transfer_order_status_id]),
     FOREIGN KEY ([transfer_order_id]) REFERENCES [forge].[transfer_order] ([transfer_order_id])
 );
 

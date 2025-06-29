@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE core.sp_log_transaction
-    @p_transaction_log_id UNIQUEIDENTIFIER,
+    @p_logging_id UNIQUEIDENTIFIER,
     @p_source_system VARCHAR(50),
     @p_user_id UNIQUEIDENTIFIER = NULL,
     @p_object_name VARCHAR(100),
@@ -14,24 +14,25 @@
 
     @p_return_result_ok BIT OUTPUT,
     @p_return_result_message NVARCHAR(MAX) OUTPUT,
-    @p_loggingid UNIQUEIDENTIFIER OUTPUT
+    @p_logging_id_out UNIQUEIDENTIFIER OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
 
     BEGIN TRY
-        -- Assign logging ID if not supplied
-        IF @p_transaction_log_id IS NULL
-            SET @p_transaction_log_id = NEWID();
-
         -- Default return values
         SET @p_return_result_ok = 1;
         SET @p_return_result_message = N'Transaction log inserted successfully.';
-        SET @p_loggingid = @p_transaction_log_id;
+        
+        IF @p_logging_id IS NULL
+            SET @p_logging_id = NEWID();
+
+        -- Set the output logging_id
+        SET @p_logging_id_out = @p_logging_id;
 
         -- Insert the log entry
         INSERT INTO core.transaction_log (
-            transaction_log_id,
+            logging_id,
             source_system,
             user_id,
             event_timestamp,
@@ -47,7 +48,7 @@ BEGIN
             created_utc
         )
         VALUES (
-            @p_transaction_log_id,
+            @p_logging_id,
             @p_source_system,
             @p_user_id,
             GETUTCDATE(),
@@ -77,12 +78,12 @@ BEGIN
             ', Procedure: ', ISNULL(@err_procedure, 'N/A'), 
             ', State: ', @err_state, ', Severity: ', @err_severity, ')'
         );
-        SET @p_loggingid = NULL;
+        SET @p_logging_id_out = NULL;
 
         -- Attempt to log the failure of this procedure itself
         BEGIN TRY
             INSERT INTO core.transaction_log (
-                transaction_log_id,
+                logging_id,
                 source_system,
                 user_id,
                 event_timestamp,
@@ -98,7 +99,7 @@ BEGIN
                 created_utc
             )
             VALUES (
-                NEWID(),
+                NEWID(), -- New logging_id for error entry
                 'CORE',
                 @p_user_id,
                 GETUTCDATE(),

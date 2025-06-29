@@ -8,9 +8,10 @@ INSERT INTO forge.transfer_order_type (transfer_order_type_id, transfer_order_ty
 (1, 'CUSTOMER_GENERATED', 'Customer generated order'),
 (2, 'INTERNAL_GENERATED', 'Internal generated order'),
 (3, 'MANUAL_CREATED', 'Manual created order');
+GO
 
 -- TRANSFER ORDER STATUS
-INSERT INTO forge.transfer_order_status (status_id, status_code, description) VALUES
+INSERT INTO forge.transfer_order_status (transfer_order_status_id, transfer_order_status_name, description) VALUES
 (1, 'CREATED',        'Order is created and ready'),
 (2, 'OPEN',          'Order is open and pending execution'),
 (3, 'ACTIVE',        'Order is active to be worked on'),
@@ -20,14 +21,17 @@ INSERT INTO forge.transfer_order_status (status_id, status_code, description) VA
 (7, 'FAILED',        'Order could not be completed'),
 (8, 'CLOSED_INCOMPLETE', 'Order is closed and not completely fulfilled'),
 (9, 'ARCHIVED',         'Order has been archived');
+GO
 
 -- FILL METHOD
-INSERT INTO forge.fill_method (fill_method_id, fill_method_code, description) VALUES
+INSERT INTO forge.fill_method (fill_method_id, fill_method_name, description) VALUES
 (1, 'FILL_OR_KILL', 'Must be completely fulfilled or cancelled'),
 (2, 'FILL_AND_KILL','Fulfill what is available, cancel the rest'),
 (3, 'PARTIAL',      'Allow partial fulfillment');
+GO
+
 -- TASK STATES
-INSERT INTO forge.task_state (task_state_id, state_code, description) VALUES
+INSERT INTO forge.task_state (task_state_id, task_state_name, description) VALUES
 (1, 'CREATED',        'Task is created and ready'),
 (2, 'PLANNED',     'Task is planned and ready'),
 (3, 'ACTIVE',      'Task is active to be worked on'),
@@ -37,10 +41,10 @@ INSERT INTO forge.task_state (task_state_id, state_code, description) VALUES
 (7, 'CANCELLED',   'Task has been cancelled'),
 (8, 'FAILED',      'Task could not be completed'),
 (9, 'ARCHIVED',    'Task has been archived');
-
+GO
 
 -- MOVEMENT TYPES
-INSERT INTO forge.movement_type (movement_type_id, movement_code, description) VALUES
+INSERT INTO forge.movement_type (movement_type_id, movement_type_name, description) VALUES
 (101, 'PICK', 'Pick inventory from location'),
 (199, 'PICK_MANUAL', 'Pick inventory from location manual'),
 (201, 'PUT', 'Put inventory into location'),
@@ -57,53 +61,61 @@ INSERT INTO forge.movement_type (movement_type_id, movement_code, description) V
 (602, 'ADJUST_UP_FOUND', 'Inventory adjustment up found'),
 (699, 'ADJUST_UP_MANUAL', 'Inventory adjustment up manual'),
 (701, 'COUNT', 'Count inventory');
+GO
 
 -- VALIDATION TYPES
-INSERT INTO forge.validation_type (validation_type_id, validation_code, description) VALUES
+INSERT INTO forge.validation_type (validation_type_id, validation_type_name, description) VALUES
 (1, 'NONE',       'No scan required'),
 (2, 'SCAN_ONCE',  'Scan one UPC per task'),
 (3, 'SCAN_ALL',   'Scan all units for task');
+GO
 
 -- BATCH STATE
-INSERT INTO forge.batch_state (batch_state_id, state_code, description) VALUES
+INSERT INTO forge.batch_state (batch_state_id, batch_state_name, description) VALUES
 (1, 'CREATED',   'Batch has been created'),
 (2, 'RELEASED',  'Batch has been released for execution'),
 (3, 'ACTIVE',    'Batch is actively executing'),
 (4, 'COMPLETED', 'Batch has completed execution');
+GO
 
 -- WAVE STATE
-INSERT INTO forge.wave_state (wave_state_id, state_code, description) VALUES
+INSERT INTO forge.wave_state (wave_state_id, wave_state_name, description) VALUES
 (1, 'CREATED',   'Wave has been created'),
 (2, 'PLANNED',   'Wave is planned and ready'),
 (3, 'ACTIVE',    'Wave is actively being processed'),
 (4, 'RELEASED',  'Wave has been released'),
 (5, 'COMPLETED', 'Wave has completed execution');
+GO
 
 -- BATCH TYPE
-INSERT INTO forge.batch_type (batch_type_id, type_code, description) VALUES
+INSERT INTO forge.batch_type (batch_type_id, batch_type_name, description) VALUES
 (1, 'STANDARD',     'Generic execution batch'),
 (2, 'ROUTE_BASED',  'Route‑specific execution grouping');
+GO
 
 -- INVENTORY STATUS
-INSERT INTO forge.inventory_status (status_id, status_code, description) VALUES
+INSERT INTO forge.inventory_status (inventory_status_id, inventory_status_name, description) VALUES
 (1, 'AVAILABLE', 'Available for allocation'),
 (2, 'HOLD',      'Not available due to hold or quarantine'),
 (3, 'WORKING',   'In use by a task'),
 (4, 'COMPLETED', 'Completed and ready for use'),
 (5, 'ARCHIVED',  'Archived and no longer in use');
+GO
 
 -- ITEM STATUS
-INSERT INTO forge.item_status (status_id, status_code, description) VALUES
+INSERT INTO forge.item_status (item_status_id, item_status_name, description) VALUES
 (1, 'ACTIVE',   'Item is in active use'),
 (2, 'INACTIVE', 'Item is not currently active'),
 (3, 'BLOCKED',  'Item is blocked or restricted'),
 (4, 'ARCHIVED', 'Item is archived and no longer in use');
+GO
 
 -- LOCATION STATUS
-INSERT INTO forge.storage_location_status (status_id, status_code, description) VALUES
+INSERT INTO forge.storage_location_status (storage_location_status_id, storage_location_status_name, description) VALUES
 (1, 'AVAILABLE', 'Location is available for use'),
 (2, 'BLOCKED',   'Location is blocked or restricted'),
 (3, 'INACTIVE',  'Location is inactive or out of service');
+GO
 
 -- LOCATION TYPES
 INSERT INTO forge.storage_location_type (location_type_id, location_type_code, description) VALUES
@@ -117,3 +129,18 @@ INSERT INTO forge.storage_location_type (location_type_id, location_type_code, d
 (8,  'SLOT',      'Slot or sub‑shelf position'),
 (9,  'CONTAINER', 'Tote, box, or other mobile storage'),
 (10, 'BIN',       'Fixed bin location for inventory');
+GO
+
+-- STOCK STATUS
+INSERT INTO forge.stock_status (stock_status_id, stock_status_name, description) VALUES
+(1, 'AVAILABLE',   'Stock is available for use'),
+(2, 'ALLOCATED',   'Stock is allocated to orders'),
+(3, 'ON_HOLD',     'Stock is on hold and not available'),
+(4, 'DAMAGED',     'Stock is damaged and not usable'),
+(5, 'EXPIRED',     'Stock has expired'),
+(6, 'IN_TRANSIT',  'Stock is in transit between locations'),
+(7, 'QUARANTINE',  'Stock is in quarantine pending inspection'),
+(8, 'RESERVED',    'Stock is reserved for specific purposes');
+GO
+
+

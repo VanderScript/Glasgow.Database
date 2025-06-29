@@ -2,9 +2,5 @@ D:\Dev\Glasgow\Glasgow.Database\bin\Debug\Glasgow.Database.dacpac
 D:\Dev\Glasgow\Glasgow.Database\bin\Debug\Glasgow.Database.dll
 D:\Dev\Glasgow\Glasgow.Database\bin\Debug\Glasgow.Database.pdb
 D:\Dev\Glasgow\Glasgow.Database\obj\Debug\Glasgow.Database.sqlproj.AssemblyReference.cache
-D:\Dev\Glasgow\Glasgow.Database\obj\Debug\Model.xml
-D:\Dev\Glasgow\Glasgow.Database\obj\Debug\refactor.xml
-D:\Dev\Glasgow\Glasgow.Database\obj\Debug\postdeploy.sql
-D:\Dev\Glasgow\Glasgow.Database\obj\Debug\predeploy.sql
 D:\Dev\Glasgow\Glasgow.Database\obj\Debug\Glasgow.Database.dll
 D:\Dev\Glasgow\Glasgow.Database\obj\Debug\Glasgow.Database.pdb

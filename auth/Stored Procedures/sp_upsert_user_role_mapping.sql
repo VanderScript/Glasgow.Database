@@ -44,6 +44,12 @@ BEGIN
 
         IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
         BEGIN
+            -- Get the user_id for logging before deletion
+            DECLARE @l_user_id UNIQUEIDENTIFIER;
+            SELECT @l_user_id = user_id 
+            FROM auth.user_role_mapping 
+            WHERE mapping_id = @p_record_id;
+
             -- Capture data before deletion
             SELECT @l_data_before = (
                 SELECT 
@@ -52,7 +58,7 @@ BEGIN
                     role_id
                 FROM auth.user_role_mapping 
                 WHERE mapping_id = @p_record_id
-                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                FOR JSON PATH
             );
 
             DELETE FROM auth.user_role_mapping
@@ -60,22 +66,25 @@ BEGIN
 
             SET @l_action_type_id = 3;
 
-            EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
-                @p_source_system = 'AUTH',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'user_role_mapping',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = 'Deleted from user_role_mapping',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'AUTH',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'user_role_mapping',
+                    @p_object_id = @l_user_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from user_role_mapping',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
         ELSE IF @l_exists = 1
         BEGIN
@@ -87,7 +96,7 @@ BEGIN
                     role_id
                 FROM auth.user_role_mapping 
                 WHERE mapping_id = @p_record_id
-                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                FOR JSON PATH
             );
 
             UPDATE auth.user_role_mapping
@@ -104,33 +113,33 @@ BEGIN
                     role_id
                 FROM auth.user_role_mapping 
                 WHERE mapping_id = @p_record_id
-                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                FOR JSON PATH
             );
 
             -- Generate diff data
-            SET @l_diff_data = (
+            WITH DiffData AS (
                 SELECT 
                     'user_id' as [field],
-                    JSON_VALUE(@l_data_before, '$.user_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$.user_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$.user_id') <> JSON_VALUE(@l_data_after, '$.user_id')
+                    JSON_VALUE(@l_data_before, '$[0].user_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].user_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].user_id') <> JSON_VALUE(@l_data_after, '$[0].user_id')
                 UNION ALL
                 SELECT 
                     'role_id' as [field],
-                    JSON_VALUE(@l_data_before, '$.role_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$.role_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$.role_id') <> JSON_VALUE(@l_data_after, '$.role_id')
-                FOR JSON PATH
-            );
+                    JSON_VALUE(@l_data_before, '$[0].role_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].role_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].role_id') <> JSON_VALUE(@l_data_after, '$[0].role_id')
+            )
+            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
 
             SET @l_action_type_id = 2;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'AUTH',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'user_role_mapping',
-                @p_object_id = @p_record_id,
+                @p_object_id = @p_user_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = @l_data_before,
@@ -140,7 +149,7 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
         ELSE
         BEGIN
@@ -165,17 +174,17 @@ BEGIN
                     role_id
                 FROM auth.user_role_mapping 
                 WHERE mapping_id = @p_record_id
-                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                FOR JSON PATH
             );
 
             SET @l_action_type_id = 1;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'AUTH',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'user_role_mapping',
-                @p_object_id = @p_record_id,
+                @p_object_id = @p_user_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = NULL,
@@ -185,7 +194,7 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
 
     END TRY
@@ -205,11 +214,11 @@ BEGIN
         );
 
         EXEC core.sp_log_transaction
-            @p_transaction_log_id = @l_transaction_log_id,
+            @p_logging_id = @l_transaction_log_id,
             @p_source_system = 'AUTH',
             @p_user_id = @p_created_by_user_id,
             @p_object_name = 'user_role_mapping',
-            @p_object_id = @p_record_id,
+            @p_object_id = @p_user_id,
             @p_action_type_id = 4, -- Error
             @p_status_code_id = 2, -- Error
             @p_data_before = NULL,
@@ -219,6 +228,6 @@ BEGIN
             @p_context_id = NULL,
             @p_return_result_ok = @p_return_result_ok OUTPUT,
             @p_return_result_message = @p_return_result_message OUTPUT,
-            @p_loggingid = @l_transaction_log_id OUTPUT;
+            @p_logging_id_out = @l_transaction_log_id OUTPUT;
     END CATCH
 END 

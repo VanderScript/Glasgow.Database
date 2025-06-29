@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [forge].[wave] (
     [wave_id]            UNIQUEIDENTIFIER NOT NULL,
     [batch_id]           UNIQUEIDENTIFIER NULL,
-    [wave_code]          VARCHAR (100)    NULL,
-    [route_code]         VARCHAR (100)    NULL,
+    [wave_name]          VARCHAR (100)    NULL,
+    [route_name]         VARCHAR (100)    NULL,
     [state_id]           INT              NULL,
     [date_created_utc]   DATETIME         NULL,
     [date_started_utc]   DATETIME         NULL,

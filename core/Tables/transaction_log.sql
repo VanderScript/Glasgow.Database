@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [core].[transaction_log] (
-    [transaction_log_id] UNIQUEIDENTIFIER NOT NULL,
+    [transaction_log_id] UNIQUEIDENTIFIER DEFAULT (NEWID()) NOT NULL,
+    [logging_id]         UNIQUEIDENTIFIER NOT NULL,
     [source_system]      VARCHAR (50)     NOT NULL,
     [user_id]            UNIQUEIDENTIFIER NULL,
     [event_timestamp]    DATETIME         DEFAULT (getutcdate()) NOT NULL,

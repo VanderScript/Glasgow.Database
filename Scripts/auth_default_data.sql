@@ -6,28 +6,30 @@
 ------------------------------------------------------------
 -- ACCESS LEVEL MAP
 ------------------------------------------------------------
-INSERT INTO auth.access_level_map (access_level_id, level, lvl_description) VALUES
-(1, 0, 'None'),
-(2, 1, 'View'),
-(3, 2, 'Edit'),
-(4, 3, 'Delete'),
-(5, 4, 'SuperUser');
+INSERT INTO auth.access_level_map ( level, lvl_description) VALUES
+(0, 'None'),
+(1, 'View'),
+(2, 'Edit'),
+(3, 'Delete'),
+(4, 'SuperUser');
 GO
 
 ------------------------------------------------------------
 -- ROLES
+-- Note: role_id is IDENTITY, so we don't specify it
 ------------------------------------------------------------
-INSERT INTO auth.roles (role_id, role) VALUES
-(1, 'NONE'),
-(2, 'VIEWONLY'),
-(3, 'EDITONLY'),
-(4, 'ADMIN'),
-(99, 'SUPERUSER');
+INSERT INTO auth.roles (role) VALUES
+('NONE'),
+('VIEWONLY'),
+('EDITONLY'),
+('ADMIN'),
+('SUPERUSER');
 GO
 
 ------------------------------------------------------------
 -- SYSTEM USERS
 -- These users are pre-defined with specific GUIDs to ensure consistency
+-- Note: user_id has DEFAULT NEWID(), but we override for system users
 ------------------------------------------------------------
 INSERT INTO auth.users (user_id, username, password_hash, password_salt) VALUES
 -- NONE user - represents no user or anonymous access

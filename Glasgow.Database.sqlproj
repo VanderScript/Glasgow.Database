@@ -134,6 +134,7 @@
     <Folder Include="auth\Stored Procedures\" />
     <Folder Include="Security\" />
     <Folder Include="Scripts" />
+    <Folder Include="Documentation" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="forge\Tables\inventory_document.sql">
@@ -233,6 +234,10 @@
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
     <Build Include="auth\Stored Procedures\sp_upsert_roles.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
+    <Build Include="auth\Stored Procedures\sp_upsert_role_claim_mapping.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
@@ -404,6 +409,10 @@
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
+    <Build Include="forge\Tables\stock_status.sql">
+      <AnsiNulls>On</AnsiNulls>
+      <QuotedIdentifier>On</QuotedIdentifier>
+    </Build>
     <Build Include="forge\Stored Procedures\sp_upsert_stock.sql">
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
@@ -422,5 +431,9 @@
     <None Include="Scripts\core_default_data.sql" />
     <None Include="Scripts\forge_default_data.sql" />
     <None Include="Scripts\auth_default_data.sql" />
+    <None Include="Glasgow.Database.publish.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="Glasgow.Database.refactorlog" />
   </ItemGroup>
 </Project>

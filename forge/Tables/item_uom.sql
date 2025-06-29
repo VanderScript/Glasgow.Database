@@ -10,6 +10,7 @@
     [default_height]            DECIMAL (10, 2)  NULL,
     [default_width]             DECIMAL (10, 2)  NULL,
     [default_length]            DECIMAL (10, 2)  NULL,
+    [is_primary] BIT NOT NULL DEFAULT 0, 
     PRIMARY KEY CLUSTERED ([item_uom_id] ASC),
     FOREIGN KEY ([item_id]) REFERENCES [forge].[item] ([item_id]),
     UNIQUE NONCLUSTERED ([item_code] ASC)

@@ -9,7 +9,7 @@ CREATE PROCEDURE forge.sp_upsert_fulfillment_method
     @p_is_delete BIT = 0,
 
     -- Table-specific columns
-    @p_method_code VARCHAR(50),
+    @p_method_name VARCHAR(50),
     @p_description VARCHAR(255),
 
     -- Outputs
@@ -27,6 +27,9 @@ BEGIN
     DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
     DECLARE @l_exists BIT = 0;
     DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF @p_record_id IS NOT NULL
        AND EXISTS(SELECT 1 FROM forge.fulfillment_method WHERE fulfillment_method_id = @p_record_id)
@@ -38,35 +41,87 @@ BEGIN
 
         IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
         BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    fulfillment_method_id,
+                    method_name,
+                    description
+                FROM forge.fulfillment_method 
+                WHERE fulfillment_method_id = @p_record_id
+                FOR JSON PATH
+            );
+            
             DELETE FROM forge.fulfillment_method
             WHERE fulfillment_method_id = @p_record_id;
 
             SET @l_action_type_id = 3;
 
-            EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'fulfillment_method',
-                @p_object_id = NULL,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = 'Deleted from fulfillment_method',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_transaction_log_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'fulfillment_method',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from fulfillment_method',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
         ELSE IF @l_exists = 1
         BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    fulfillment_method_id,
+                    method_name,
+                    description
+                FROM forge.fulfillment_method 
+                WHERE fulfillment_method_id = @p_record_id
+                FOR JSON PATH
+            );
+
             UPDATE forge.fulfillment_method
             SET
-                method_code = @p_method_code,
+                method_name = @p_method_name,
                 description = @p_description
             WHERE fulfillment_method_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    fulfillment_method_id,
+                    method_name,
+                    description
+                FROM forge.fulfillment_method 
+                WHERE fulfillment_method_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+            WITH DiffData AS (
+                SELECT 
+                    'method_name' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].method_name') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].method_name') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].method_name') <> JSON_VALUE(@l_data_after, '$[0].method_name')
+                UNION ALL
+                SELECT 
+                    'description' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].description') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].description') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].description') <> JSON_VALUE(@l_data_after, '$[0].description')
+            )
+            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
 
             SET @l_action_type_id = 2;
 
@@ -75,17 +130,17 @@ BEGIN
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'fulfillment_method',
-                @p_object_id = NULL,
+                @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
                 @p_message = 'Updated fulfillment_method',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
         ELSE
         BEGIN
@@ -95,14 +150,25 @@ BEGIN
             INSERT INTO forge.fulfillment_method
             (
                 fulfillment_method_id,
-                method_code,
+                method_name,
                 description
             )
             VALUES
             (
                 @p_record_id,
-                @p_method_code,
+                @p_method_name,
                 @p_description
+            );
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    fulfillment_method_id,
+                    method_name,
+                    description
+                FROM forge.fulfillment_method 
+                WHERE fulfillment_method_id = @p_record_id
+                FOR JSON PATH
             );
 
             SET @l_action_type_id = 1;
@@ -112,17 +178,17 @@ BEGIN
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'fulfillment_method',
-                @p_object_id = NULL,
+                @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = NULL,
-                @p_data_after = NULL,
+                @p_data_after = @l_data_after,
                 @p_diff_data = NULL,
                 @p_message = 'Inserted into fulfillment_method',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
 
     END TRY
@@ -159,7 +225,7 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = NULL;
+                @p_logging_id_out = NULL;
         END TRY
         BEGIN CATCH
         END CATCH

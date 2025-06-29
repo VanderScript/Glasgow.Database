@@ -22,6 +22,9 @@ BEGIN
     DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
     DECLARE @l_exists BIT = 0;
     DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF EXISTS (
         SELECT 1 FROM forge.batch_transfer_order
@@ -34,28 +37,104 @@ BEGIN
     BEGIN TRY
         IF @p_is_delete = 1 AND @l_exists = 1
         BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    batch_id,
+                    transfer_order_id
+                FROM forge.batch_transfer_order 
+                WHERE batch_id = @p_batch_id AND transfer_order_id = @p_transfer_order_id
+                FOR JSON PATH
+            );
+            
             DELETE FROM forge.batch_transfer_order
             WHERE batch_id = @p_batch_id AND transfer_order_id = @p_transfer_order_id;
 
             SET @l_action_type_id = 3;
 
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'batch_transfer_order',
+                    @p_object_id = NULL,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from batch_transfer_order',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
+        END
+
+        ELSE IF @l_exists = 1
+        BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    batch_id,
+                    transfer_order_id
+                FROM forge.batch_transfer_order 
+                WHERE batch_id = @p_batch_id AND transfer_order_id = @p_transfer_order_id
+                FOR JSON PATH
+            );
+
+            UPDATE forge.batch_transfer_order
+            SET
+                batch_id = @p_batch_id,
+                transfer_order_id = @p_transfer_order_id
+            WHERE batch_id = @p_batch_id AND transfer_order_id = @p_transfer_order_id;
+
+            SELECT @l_data_after = (
+                SELECT 
+                    batch_id,
+                    transfer_order_id
+                FROM forge.batch_transfer_order 
+                WHERE batch_id = @p_batch_id AND transfer_order_id = @p_transfer_order_id
+                FOR JSON PATH
+            );
+
+            WITH DiffData AS (
+                SELECT 
+                    'batch_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].batch_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].batch_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].batch_id') <> JSON_VALUE(@l_data_after, '$[0].batch_id')
+                UNION ALL
+                SELECT 
+                    'transfer_order_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].transfer_order_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].transfer_order_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].transfer_order_id') <> JSON_VALUE(@l_data_after, '$[0].transfer_order_id')
+            )
+            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
+
+            SET @l_action_type_id = 2;
+
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'batch_transfer_order',
                 @p_object_id = NULL,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = 'Deleted from batch_transfer_order',
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated batch_transfer_order',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
+
         ELSE IF @l_exists = 0
         BEGIN
             INSERT INTO forge.batch_transfer_order (
@@ -70,7 +149,7 @@ BEGIN
             SET @l_action_type_id = 1;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'batch_transfer_order',
@@ -84,7 +163,7 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
     END TRY
     BEGIN CATCH
@@ -106,7 +185,7 @@ BEGIN
 
         BEGIN TRY
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_transaction_log_id,
+                @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'batch_transfer_order',
@@ -120,7 +199,7 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = NULL;
+                @p_logging_id_out = NULL;
         END TRY
         BEGIN CATCH
         END CATCH

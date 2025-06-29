@@ -8,12 +8,12 @@ CREATE PROCEDURE forge.sp_upsert_batch
     @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
-    -- Table-specific columns
-    @p_batch_code VARCHAR(100),
+    -- Table columns
+    @p_batch_name VARCHAR(100),
     @p_batch_type_id INT,
-    @p_state_id INT,
-    @p_date_started_utc DATETIME,
-    @p_date_completed_utc DATETIME,
+    @p_batch_state_id INT,                -- Changed from UNIQUEIDENTIFIER to INT to match batch_state table
+    @p_date_started_utc DATETIME = NULL,
+    @p_date_completed_utc DATETIME = NULL,
 
     -- Outputs
     @p_return_result_ok BIT OUTPUT,
@@ -30,68 +30,152 @@ BEGIN
     DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
     DECLARE @l_exists BIT = 0;
     DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.batch WHERE batch_id = @p_record_id)
+       AND EXISTS (SELECT 1 FROM forge.batch WHERE batch_id = @p_record_id)
     BEGIN
         SET @l_exists = 1;
     END
 
     BEGIN TRY
-
         IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
         BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    batch_id,
+                    batch_name,
+                    batch_type_id,
+                    batch_state_id,
+                    date_created_utc,
+                    date_started_utc,
+                    date_completed_utc
+                FROM forge.batch 
+                WHERE batch_id = @p_record_id
+                FOR JSON PATH
+            );
+            
             DELETE FROM forge.batch
             WHERE batch_id = @p_record_id;
 
             SET @l_action_type_id = 3;
 
-            EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = 'Deleted from batch',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'batch',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from batch',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
         ELSE IF @l_exists = 1
         BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    batch_id,
+                    batch_name,
+                    batch_type_id,
+                    batch_state_id,
+                    date_created_utc,
+                    date_started_utc,
+                    date_completed_utc
+                FROM forge.batch 
+                WHERE batch_id = @p_record_id
+                FOR JSON PATH
+            );
+
             UPDATE forge.batch
             SET
-                batch_code = @p_batch_code,
+                batch_name = @p_batch_name,
                 batch_type_id = @p_batch_type_id,
-                state_id = @p_state_id,
+                batch_state_id = @p_batch_state_id,
                 date_started_utc = @p_date_started_utc,
                 date_completed_utc = @p_date_completed_utc
             WHERE batch_id = @p_record_id;
 
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    batch_id,
+                    batch_name,
+                    batch_type_id,
+                    batch_state_id,
+                    date_created_utc,
+                    date_started_utc,
+                    date_completed_utc
+                FROM forge.batch 
+                WHERE batch_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+            WITH DiffData AS (
+                SELECT 
+                    'batch_name' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].batch_name') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].batch_name') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].batch_name') <> JSON_VALUE(@l_data_after, '$[0].batch_name')
+                UNION ALL
+                SELECT 
+                    'batch_type_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].batch_type_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].batch_type_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].batch_type_id') <> JSON_VALUE(@l_data_after, '$[0].batch_type_id')
+                UNION ALL
+                SELECT 
+                    'state_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].state_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].state_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].state_id') <> JSON_VALUE(@l_data_after, '$[0].state_id')
+                UNION ALL
+                SELECT 
+                    'date_started_utc' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].date_started_utc') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].date_started_utc') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].date_started_utc') <> JSON_VALUE(@l_data_after, '$[0].date_started_utc')
+                UNION ALL
+                SELECT 
+                    'date_completed_utc' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].date_completed_utc') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].date_completed_utc') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].date_completed_utc') <> JSON_VALUE(@l_data_after, '$[0].date_completed_utc')
+            )
+            SELECT @l_diff_data = (SELECT * FROM DiffData FOR JSON PATH);
+
             SET @l_action_type_id = 2;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'batch',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
                 @p_message = 'Updated batch',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
         ELSE
         BEGIN
@@ -101,26 +185,41 @@ BEGIN
             INSERT INTO forge.batch
             (
                 batch_id,
-                batch_code,
+                batch_name,
                 batch_type_id,
-                state_id,
+                batch_state_id,
                 date_started_utc,
                 date_completed_utc
             )
             VALUES
             (
                 @p_record_id,
-                @p_batch_code,
+                @p_batch_name,
                 @p_batch_type_id,
-                @p_state_id,
+                @p_batch_state_id,
                 @p_date_started_utc,
                 @p_date_completed_utc
+            );
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    batch_id,
+                    batch_name,
+                    batch_type_id,
+                    batch_state_id,
+                    date_created_utc,
+                    date_started_utc,
+                    date_completed_utc
+                FROM forge.batch 
+                WHERE batch_id = @p_record_id
+                FOR JSON PATH
             );
 
             SET @l_action_type_id = 1;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'batch',
@@ -128,13 +227,13 @@ BEGIN
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = NULL,
-                @p_data_after = NULL,
+                @p_data_after = @l_data_after,
                 @p_diff_data = NULL,
                 @p_message = 'Inserted into batch',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
 
     END TRY
@@ -153,21 +252,23 @@ BEGIN
             ', Error: ', @l_err_number, ')'
         );
 
+        -- Decide action type based on what we were attempting
         SET @l_action_type_id = CASE
-            WHEN @p_is_delete = 1 THEN 3
-            WHEN @l_exists = 1 THEN 2
-            ELSE 1
+            WHEN @p_is_delete = 1 THEN 3   -- was trying to delete
+            WHEN @l_exists = 1 THEN 2      -- was trying to update
+            ELSE 1                         -- was trying to insert
         END;
 
+        -- Attempt to log the fail
         BEGIN TRY
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_transaction_log_id,
+                @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'batch',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,
+                @p_status_code_id = 2,  -- FAILED
                 @p_data_before = NULL,
                 @p_data_after = NULL,
                 @p_diff_data = NULL,
@@ -175,9 +276,10 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = NULL;
+                @p_logging_id_out = NULL;
         END TRY
         BEGIN CATCH
+            -- Suppress nested logging failure to avoid recursion
         END CATCH
     END CATCH
 END;

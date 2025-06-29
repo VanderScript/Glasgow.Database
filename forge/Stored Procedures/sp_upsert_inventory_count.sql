@@ -15,16 +15,15 @@ CREATE PROCEDURE forge.sp_upsert_inventory_count
     @p_expected_quantity INT,
     @p_counted_quantity INT,
     @p_count_status VARCHAR(50),
-    @p_counted_by_user_id UNIQUEIDENTIFIER,
-    @p_validated_by_user_id UNIQUEIDENTIFIER,
-    @p_date_counted_utc DATETIME,
-    @p_date_validated_utc DATETIME,
-    @p_date_created_utc DATETIME,
-    @p_date_updated_utc DATETIME,
+    @p_counted_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_validated_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_date_counted_utc DATETIME = NULL,
+    @p_date_validated_utc DATETIME = NULL,
 
     -- Outputs
     @p_return_result_ok BIT OUTPUT,
-    @p_return_result_message NVARCHAR(MAX) OUTPUT)
+    @p_return_result_message NVARCHAR(MAX) OUTPUT
+)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -36,6 +35,9 @@ BEGIN
     DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
     DECLARE @l_exists BIT = 0;
     DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF @p_record_id IS NOT NULL
        AND EXISTS(SELECT 1 FROM forge.inventory_count WHERE inventory_count_id = @p_record_id)
@@ -47,30 +49,75 @@ BEGIN
 
         IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
         BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    inventory_count_id,
+                    inventory_document_id,
+                    storage_location_id,
+                    item_uom_id,
+                    expected_quantity,
+                    counted_quantity,
+                    count_status,
+                    counted_by_user_id,
+                    validated_by_user_id,
+                    date_counted_utc,
+                    date_validated_utc,
+                    date_created_utc,
+                    date_updated_utc
+                FROM forge.inventory_count 
+                WHERE inventory_count_id = @p_record_id
+                FOR JSON PATH
+            );
+            
             DELETE FROM forge.inventory_count
             WHERE inventory_count_id = @p_record_id;
 
             SET @l_action_type_id = 3;
 
-            EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'inventory_count',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = 'Deleted from inventory_count',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'inventory_count',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from inventory_count',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
         ELSE IF @l_exists = 1
         BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    inventory_count_id,
+                    inventory_document_id,
+                    storage_location_id,
+                    item_uom_id,
+                    expected_quantity,
+                    counted_quantity,
+                    count_status,
+                    counted_by_user_id,
+                    validated_by_user_id,
+                    date_counted_utc,
+                    date_validated_utc,
+                    date_created_utc,
+                    date_updated_utc
+                FROM forge.inventory_count 
+                WHERE inventory_count_id = @p_record_id
+                FOR JSON PATH
+            );
+
             UPDATE forge.inventory_count
             SET
                 inventory_document_id = @p_inventory_document_id,
@@ -83,28 +130,112 @@ BEGIN
                 validated_by_user_id = @p_validated_by_user_id,
                 date_counted_utc = @p_date_counted_utc,
                 date_validated_utc = @p_date_validated_utc,
-                date_created_utc = @p_date_created_utc,
-                date_updated_utc = @p_date_updated_utc
+                date_updated_utc = GETUTCDATE()
             WHERE inventory_count_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    inventory_count_id,
+                    inventory_document_id,
+                    storage_location_id,
+                    item_uom_id,
+                    expected_quantity,
+                    counted_quantity,
+                    count_status,
+                    counted_by_user_id,
+                    validated_by_user_id,
+                    date_counted_utc,
+                    date_validated_utc,
+                    date_created_utc,
+                    date_updated_utc
+                FROM forge.inventory_count 
+                WHERE inventory_count_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+            WITH DiffData AS (
+                SELECT 
+                    'inventory_document_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].inventory_document_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].inventory_document_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].inventory_document_id') <> JSON_VALUE(@l_data_after, '$[0].inventory_document_id')
+                UNION ALL
+                SELECT 
+                    'storage_location_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].storage_location_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].storage_location_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].storage_location_id') <> JSON_VALUE(@l_data_after, '$[0].storage_location_id')
+                UNION ALL
+                SELECT 
+                    'item_uom_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].item_uom_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].item_uom_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].item_uom_id') <> JSON_VALUE(@l_data_after, '$[0].item_uom_id')
+                UNION ALL
+                SELECT 
+                    'expected_quantity' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].expected_quantity') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].expected_quantity') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].expected_quantity') <> JSON_VALUE(@l_data_after, '$[0].expected_quantity')
+                UNION ALL
+                SELECT 
+                    'counted_quantity' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].counted_quantity') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].counted_quantity') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].counted_quantity') <> JSON_VALUE(@l_data_after, '$[0].counted_quantity')
+                UNION ALL
+                SELECT 
+                    'count_status' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].count_status') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].count_status') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].count_status') <> JSON_VALUE(@l_data_after, '$[0].count_status')
+                UNION ALL
+                SELECT 
+                    'counted_by_user_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].counted_by_user_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].counted_by_user_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].counted_by_user_id') <> JSON_VALUE(@l_data_after, '$[0].counted_by_user_id')
+                UNION ALL
+                SELECT 
+                    'validated_by_user_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].validated_by_user_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].validated_by_user_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].validated_by_user_id') <> JSON_VALUE(@l_data_after, '$[0].validated_by_user_id')
+                UNION ALL
+                SELECT 
+                    'date_counted_utc' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].date_counted_utc') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].date_counted_utc') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].date_counted_utc') <> JSON_VALUE(@l_data_after, '$[0].date_counted_utc')
+                UNION ALL
+                SELECT 
+                    'date_validated_utc' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].date_validated_utc') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].date_validated_utc') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].date_validated_utc') <> JSON_VALUE(@l_data_after, '$[0].date_validated_utc')
+            )
+            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
 
             SET @l_action_type_id = 2;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'inventory_count',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
                 @p_message = 'Updated inventory_count',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
         ELSE
         BEGIN
@@ -123,9 +254,7 @@ BEGIN
                 counted_by_user_id,
                 validated_by_user_id,
                 date_counted_utc,
-                date_validated_utc,
-                date_created_utc,
-                date_updated_utc
+                date_validated_utc
             )
             VALUES
             (
@@ -139,15 +268,34 @@ BEGIN
                 @p_counted_by_user_id,
                 @p_validated_by_user_id,
                 @p_date_counted_utc,
-                @p_date_validated_utc,
-                @p_date_created_utc,
-                @p_date_updated_utc
+                @p_date_validated_utc
+            );
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    inventory_count_id,
+                    inventory_document_id,
+                    storage_location_id,
+                    item_uom_id,
+                    expected_quantity,
+                    counted_quantity,
+                    count_status,
+                    counted_by_user_id,
+                    validated_by_user_id,
+                    date_counted_utc,
+                    date_validated_utc,
+                    date_created_utc,
+                    date_updated_utc
+                FROM forge.inventory_count 
+                WHERE inventory_count_id = @p_record_id
+                FOR JSON PATH
             );
 
             SET @l_action_type_id = 1;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'inventory_count',
@@ -155,13 +303,13 @@ BEGIN
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = NULL,
-                @p_data_after = NULL,
+                @p_data_after = @l_data_after,
                 @p_diff_data = NULL,
                 @p_message = 'Inserted into inventory_count',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
 
     END TRY
@@ -188,7 +336,7 @@ BEGIN
 
         BEGIN TRY
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_transaction_log_id,
+                @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'inventory_count',
@@ -202,7 +350,7 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = NULL;
+                @p_logging_id_out = NULL;
         END TRY
         BEGIN CATCH
         END CATCH

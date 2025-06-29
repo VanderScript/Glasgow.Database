@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="6554dd9b-2f8b-4fb4-b786-7dcaa2563ea4" ChangeDateTime="06/29/2025 16:06:25">
+    <Property Name="ElementName" Value="[auth].[user_sessions].[jwttoken]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[auth].[user_sessions]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="session_token" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0ae673c8-f753-4777-8b89-89d7657275ca" ChangeDateTime="06/29/2025 16:06:34">
+    <Property Name="ElementName" Value="[auth].[user_sessions].[refreshtoken]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[auth].[user_sessions]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="refresh_token" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b9617cf2-06d8-40a2-ab6e-3edceed0d458" ChangeDateTime="06/29/2025 16:08:10">
+    <Property Name="ElementName" Value="[auth].[user_sessions].[expires]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[auth].[user_sessions]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="date_expires_utc" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="2951ee37-6a4c-4b60-8617-9fce0c4b0295" ChangeDateTime="06/29/2025 16:09:42">
+    <Property Name="ElementName" Value="[forge].[batch_state].[state_code]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[forge].[batch_state]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="batch_state_name" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b03c3b1e-efec-4fd5-9e35-e46289a0aefd" ChangeDateTime="06/29/2025 16:11:25">
+    <Property Name="ElementName" Value="[forge].[batch_type].[type_code]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[forge].[batch_type]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="batch_type_name" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8d136fdb-054d-4d66-ba2a-def74e0a4ed1" ChangeDateTime="06/29/2025 16:11:42">
+    <Property Name="ElementName" Value="[forge].[fill_method].[fill_method_code]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[forge].[fill_method]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="fill_method_name" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="69a7f168-642f-48e4-8204-8c8e92f2d034" ChangeDateTime="06/29/2025 16:12:08">
+    <Property Name="ElementName" Value="[forge].[fulfillment_assignment].[assignment_id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[forge].[fulfillment_assignment]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="fulfillment_assignment_id" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a9d67c15-f714-4bae-8e31-75693a435f13" ChangeDateTime="06/29/2025 16:22:35">
+    <Property Name="ElementName" Value="[forge].[inventory_document].[document_code]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[forge].[inventory_document]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="document_number" />
+  </Operation>
+</Operations>

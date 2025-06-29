@@ -6,8 +6,8 @@
     @p_is_delete BIT = 0,                     -- Add/Update if 0, Delete if 1
 
     -- Table columns
-    @p_document_code VARCHAR(100),
-    @p_status VARCHAR(50),                    -- e.g., 'OPEN', 'IN_PROGRESS', 'COMPLETED'
+    @p_document_number VARCHAR(100),
+    @p_inventory_status_id INT,
     @p_date_created_utc DATETIME = NULL,
     @p_date_updated_utc DATETIME = NULL,
     @p_date_completed_utc DATETIME = NULL,
@@ -33,6 +33,9 @@ BEGIN
     DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();  -- For logging
     DECLARE @l_exists BIT = 0;                     -- If record found
     DECLARE @l_action_type_id INT;                 -- 1=Create, 2=Update, 3=Delete
+    DECLARE @l_data_before NVARCHAR(MAX);             -- For capturing data before deletion
+    DECLARE @l_data_after NVARCHAR(MAX);              -- For capturing data after update or insert
+    DECLARE @l_diff_data NVARCHAR(MAX);               -- For capturing diff data
 
     /***************************************************************************
      * Existence check
@@ -49,38 +52,72 @@ BEGIN
          **************************************************************************/
         IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
         BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    inventory_document_id,
+                    document_number,
+                    inventory_status_id,
+                    date_created_utc,
+                    date_updated_utc,
+                    date_completed_utc,
+                    created_by_user_id,
+                    completed_by_user_id
+                FROM forge.inventory_document 
+                WHERE inventory_document_id = @p_record_id
+                FOR JSON PATH
+            );
+            
             DELETE FROM forge.inventory_document
             WHERE inventory_document_id = @p_record_id;
 
-            SET @l_action_type_id = 3; -- DELETE
+            SET @l_action_type_id = 3;
 
-            -- Log success
-            EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_caller_user_id,
-                @p_object_name = 'inventory_document',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,       -- SUCCESS
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = 'Deleted inventory_document record',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'inventory_document',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from inventory_document',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
         /***************************************************************************
          * Update logic
          **************************************************************************/
         ELSE IF @l_exists = 1
         BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    inventory_document_id,
+                    document_number,
+                    inventory_status_id,
+                    date_created_utc,
+                    date_updated_utc,
+                    date_completed_utc,
+                    created_by_user_id,
+                    completed_by_user_id
+                FROM forge.inventory_document 
+                WHERE inventory_document_id = @p_record_id
+                FOR JSON PATH
+            );
+
             UPDATE forge.inventory_document
             SET
-                document_code = @p_document_code,
-                status = @p_status,
+                document_number = @p_document_number,
+                inventory_status_id = @p_inventory_status_id,
                 date_created_utc = @p_date_created_utc,
                 date_updated_utc = @p_date_updated_utc,
                 date_completed_utc = @p_date_completed_utc,
@@ -88,25 +125,77 @@ BEGIN
                 completed_by_user_id = @p_completed_by_user_id
             WHERE inventory_document_id = @p_record_id;
 
-            SET @l_action_type_id = 2; -- UPDATE
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    inventory_document_id,
+                    document_number,
+                    inventory_status_id,
+                    date_created_utc,
+                    date_updated_utc,
+                    date_completed_utc,
+                    created_by_user_id,
+                    completed_by_user_id
+                FROM forge.inventory_document 
+                WHERE inventory_document_id = @p_record_id
+                FOR JSON PATH
+            );
 
-            -- Log success
+            -- Generate diff data
+                WITH DiffData AS (
+                    SELECT 
+                        'document_number' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].document_number') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].document_number') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].document_number') <> JSON_VALUE(@l_data_after, '$[0].document_number')
+                        AND JSON_VALUE(@l_data_before, '$[0].document_number') IS NOT NULL 
+                        AND JSON_VALUE(@l_data_after, '$[0].document_number') IS NOT NULL
+                    UNION ALL
+                    SELECT 
+                        'status_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].status_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].status_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].status_id') <> JSON_VALUE(@l_data_after, '$[0].status_id')
+                        AND JSON_VALUE(@l_data_before, '$[0].status_id') IS NOT NULL 
+                        AND JSON_VALUE(@l_data_after, '$[0].status_id') IS NOT NULL
+                    UNION ALL
+                    SELECT 
+                        'date_completed_utc' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].date_completed_utc') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].date_completed_utc') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].date_completed_utc') <> JSON_VALUE(@l_data_after, '$[0].date_completed_utc')
+                        AND JSON_VALUE(@l_data_before, '$[0].date_completed_utc') IS NOT NULL 
+                        AND JSON_VALUE(@l_data_after, '$[0].date_completed_utc') IS NOT NULL
+                    UNION ALL
+                    SELECT 
+                        'completed_by_user_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].completed_by_user_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].completed_by_user_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].completed_by_user_id') <> JSON_VALUE(@l_data_after, '$[0].completed_by_user_id')
+                        AND JSON_VALUE(@l_data_before, '$[0].completed_by_user_id') IS NOT NULL 
+                        AND JSON_VALUE(@l_data_after, '$[0].completed_by_user_id') IS NOT NULL
+                )
+
+                SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
+
+            SET @l_action_type_id = 2;
+
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
-                @p_user_id = @p_caller_user_id,
+                @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'inventory_document',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,       -- SUCCESS
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = 'Updated inventory_document record',
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated inventory_document',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
         /***************************************************************************
          * Insert logic
@@ -119,8 +208,8 @@ BEGIN
             INSERT INTO forge.inventory_document
             (
                 inventory_document_id,
-                document_code,
-                status,
+                document_number,
+                inventory_status_id,
                 date_created_utc,
                 date_updated_utc,
                 date_completed_utc,
@@ -130,8 +219,8 @@ BEGIN
             VALUES
             (
                 @p_record_id,
-                @p_document_code,
-                @p_status,
+                @p_document_number,
+                @p_inventory_status_id,
                 @p_date_created_utc,
                 @p_date_updated_utc,
                 @p_date_completed_utc,
@@ -139,25 +228,40 @@ BEGIN
                 @p_completed_by_user_id
             );
 
-            SET @l_action_type_id = 1; -- CREATE
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    inventory_document_id,
+                    document_number,
+                    inventory_status_id,
+                    date_created_utc,
+                    date_updated_utc,
+                    date_completed_utc,
+                    created_by_user_id,
+                    completed_by_user_id
+                FROM forge.inventory_document 
+                WHERE inventory_document_id = @p_record_id
+                FOR JSON PATH
+            );
 
-            -- Log success
+            SET @l_action_type_id = 1;
+
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
-                @p_user_id = @p_caller_user_id,
+                @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'inventory_document',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,   -- SUCCESS
+                @p_status_code_id = 1,
                 @p_data_before = NULL,
-                @p_data_after = NULL,
+                @p_data_after = @l_data_after,
                 @p_diff_data = NULL,
-                @p_message = 'Inserted inventory_document record',
+                @p_message = 'Inserted into inventory_document',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
 
     END TRY
@@ -189,7 +293,7 @@ BEGIN
         -- Attempt to log the fail
         BEGIN TRY
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_transaction_log_id,
+                @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_caller_user_id,
                 @p_object_name = 'inventory_document',
@@ -203,7 +307,7 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = NULL;
+                @p_logging_id_out = NULL;
         END TRY
         BEGIN CATCH
             -- Suppress nested logging failure to avoid recursion

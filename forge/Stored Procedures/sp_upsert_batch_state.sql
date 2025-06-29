@@ -8,9 +8,9 @@ CREATE PROCEDURE forge.sp_upsert_batch_state
     @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
-    -- Table-specific columns
-    @p_state_code VARCHAR(50),
-    @p_description VARCHAR(255),
+    -- Table columns
+    @p_batch_state_name VARCHAR(50),
+    @p_description VARCHAR(255) = NULL,
 
     -- Outputs
     @p_return_result_ok BIT OUTPUT,
@@ -27,52 +27,54 @@ BEGIN
     DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
     DECLARE @l_exists BIT = 0;
     DECLARE @l_action_type_id INT;
-    DECLARE @l_data_before NVARCHAR(MAX) = NULL;
-    DECLARE @l_data_after NVARCHAR(MAX) = NULL;
-    DECLARE @l_diff_data NVARCHAR(MAX) = NULL;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.batch_state WHERE batch_state_id = @p_record_id)
+       AND EXISTS (SELECT 1 FROM forge.batch_state WHERE batch_state_id = @p_record_id)
     BEGIN
         SET @l_exists = 1;
     END
 
     BEGIN TRY
-
         IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
         BEGIN
             -- Capture data before deletion
             SELECT @l_data_before = (
                 SELECT 
                     batch_state_id,
-                    state_code,
+                    batch_state_name,
                     description
                 FROM forge.batch_state 
                 WHERE batch_state_id = @p_record_id
-                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                FOR JSON PATH
             );
-
+            
             DELETE FROM forge.batch_state
             WHERE batch_state_id = @p_record_id;
 
             SET @l_action_type_id = 3;
 
-            EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch_state',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = 'Deleted from batch_state',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'batch_state',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from batch_state',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
         ELSE IF @l_exists = 1
         BEGIN
@@ -80,16 +82,16 @@ BEGIN
             SELECT @l_data_before = (
                 SELECT 
                     batch_state_id,
-                    state_code,
+                    batch_state_name,
                     description
                 FROM forge.batch_state 
                 WHERE batch_state_id = @p_record_id
-                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                FOR JSON PATH
             );
 
             UPDATE forge.batch_state
             SET
-                state_code = @p_state_code,
+                batch_state_name = @p_batch_state_name,
                 description = @p_description
             WHERE batch_state_id = @p_record_id;
 
@@ -97,33 +99,33 @@ BEGIN
             SELECT @l_data_after = (
                 SELECT 
                     batch_state_id,
-                    state_code,
+                    batch_state_name,
                     description
                 FROM forge.batch_state 
                 WHERE batch_state_id = @p_record_id
-                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                FOR JSON PATH
             );
 
             -- Generate diff data
-            SET @l_diff_data = (
+            WITH DiffData AS (
                 SELECT 
-                    'state_code' as [field],
-                    JSON_VALUE(@l_data_before, '$.state_code') as [old_value],
-                    JSON_VALUE(@l_data_after, '$.state_code') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$.state_code') <> JSON_VALUE(@l_data_after, '$.state_code')
+                    'batch_state_name' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].batch_state_name') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].batch_state_name') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].batch_state_name') <> JSON_VALUE(@l_data_after, '$[0].batch_state_name')
                 UNION ALL
                 SELECT 
                     'description' as [field],
-                    JSON_VALUE(@l_data_before, '$.description') as [old_value],
-                    JSON_VALUE(@l_data_after, '$.description') as [new_value]
-                WHERE ISNULL(JSON_VALUE(@l_data_before, '$.description'), '') <> ISNULL(JSON_VALUE(@l_data_after, '$.description'), '')
-                FOR JSON PATH
-            );
+                    JSON_VALUE(@l_data_before, '$[0].description') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].description') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].description') <> JSON_VALUE(@l_data_after, '$[0].description')
+            )
+            SELECT @l_diff_data = (SELECT * FROM DiffData FOR JSON PATH);
 
             SET @l_action_type_id = 2;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'batch_state',
@@ -137,23 +139,27 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
         ELSE
         BEGIN
             IF @p_record_id IS NULL
-                SET @p_record_id = (SELECT ISNULL(MAX(batch_state_id), 0) + 1 FROM forge.batch_state);
+            BEGIN
+                -- Get the next available ID
+                SELECT @p_record_id = ISNULL(MAX(batch_state_id), 0) + 1
+                FROM forge.batch_state;
+            END
 
             INSERT INTO forge.batch_state
             (
                 batch_state_id,
-                state_code,
+                batch_state_name,
                 description
             )
             VALUES
             (
                 @p_record_id,
-                @p_state_code,
+                @p_batch_state_name,
                 @p_description
             );
 
@@ -161,17 +167,17 @@ BEGIN
             SELECT @l_data_after = (
                 SELECT 
                     batch_state_id,
-                    state_code,
+                    batch_state_name,
                     description
                 FROM forge.batch_state 
                 WHERE batch_state_id = @p_record_id
-                FOR JSON PATH, WITHOUT_ARRAY_WRAPPER
+                FOR JSON PATH
             );
 
             SET @l_action_type_id = 1;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'batch_state',
@@ -185,7 +191,7 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = @l_log_id OUTPUT;
+                @p_logging_id_out = @l_log_id OUTPUT;
         END
 
     END TRY
@@ -204,27 +210,34 @@ BEGIN
             ', Error: ', @l_err_number, ')'
         );
 
-        SET @l_action_type_id = CASE WHEN @p_is_delete = 1 THEN 3 ELSE 1 END;
+        -- Decide action type based on what we were attempting
+        SET @l_action_type_id = CASE
+            WHEN @p_is_delete = 1 THEN 3   -- was trying to delete
+            WHEN @l_exists = 1 THEN 2      -- was trying to update
+            ELSE 1                         -- was trying to insert
+        END;
 
+        -- Attempt to log the fail
         BEGIN TRY
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_transaction_log_id,
+                @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'batch_state',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,
-                @p_data_before = @l_data_before,
-                @p_data_after = @l_data_after,
-                @p_diff_data = @l_diff_data,
+                @p_status_code_id = 2,  -- FAILED
+                @p_data_before = NULL,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
                 @p_message = @p_return_result_message,
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_loggingid = NULL;
+                @p_logging_id_out = NULL;
         END TRY
         BEGIN CATCH
+            -- Suppress nested logging failure to avoid recursion
         END CATCH
     END CATCH
 END;
