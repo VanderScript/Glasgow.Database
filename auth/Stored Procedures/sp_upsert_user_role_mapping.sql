@@ -13,7 +13,7 @@ CREATE PROCEDURE auth.sp_upsert_user_role_mapping
     @p_role_id INT,
 
     -- Logging
-    @p_loggingid UNIQUEIDENTIFIER = NULL,
+    @p_logging_id UNIQUEIDENTIFIER = NULL,
 
     -- Outputs
     @p_return_result_ok BIT OUTPUT,
@@ -27,7 +27,7 @@ BEGIN
     IF @p_created_by_user_id IS NULL
         SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
 
-    DECLARE @l_log_id UNIQUEIDENTIFIER = ISNULL(@p_loggingid, NEWID());
+    DECLARE @l_log_id UNIQUEIDENTIFIER = ISNULL(@p_logging_id, NEWID());
     DECLARE @l_exists BIT = 0;
     DECLARE @l_action_type_id INT;
     DECLARE @l_data_before NVARCHAR(MAX) = NULL;

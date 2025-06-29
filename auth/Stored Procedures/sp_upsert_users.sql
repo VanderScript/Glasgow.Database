@@ -260,7 +260,7 @@ BEGIN
                 @p_created_by_user_id = '00000000-0000-0000-0000-000000000002', -- SYSTEM user
                 @p_user_id = @p_record_id,
                 @p_role_id = 1, -- Role ID for 'NONE'
-                @p_loggingid = @l_log_id, -- Use same logging ID for traceability
+                @p_logging_id = @l_log_id, -- Use same logging ID for traceability
                 @p_return_result_ok = @l_role_result_ok OUTPUT,
                 @p_return_result_message = @l_role_result_message OUTPUT;
 
