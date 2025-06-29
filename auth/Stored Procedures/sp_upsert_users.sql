@@ -327,6 +327,6 @@ BEGIN
             @p_context_id = NULL,
             @p_return_result_ok = @p_return_result_ok OUTPUT,
             @p_return_result_message = @p_return_result_message OUTPUT,
-            @p_loggingid_out = @l_transaction_log_id OUTPUT;
+            @p_logging_id_out = @l_transaction_log_id OUTPUT;
     END CATCH
 END 

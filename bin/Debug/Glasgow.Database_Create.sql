@@ -241,6 +241,15 @@ IF fulltextserviceproperty(N'IsFulltextInstalled') = 1
 
 
 GO
+PRINT N'Creating Schema [api]...';
+
+
+GO
+CREATE SCHEMA [api]
+    AUTHORIZATION [dbo];
+
+
+GO
 PRINT N'Creating Schema [auth]...';
 
 
@@ -477,78 +486,6 @@ CREATE TABLE [forge].[inventory_document] (
     [created_by_user_id]    UNIQUEIDENTIFIER NULL,
     [completed_by_user_id]  UNIQUEIDENTIFIER NULL,
     PRIMARY KEY CLUSTERED ([inventory_document_id] ASC)
-);
-
-
-GO
-PRINT N'Creating Table [forge].[sub_order_line_task]...';
-
-
-GO
-CREATE TABLE [forge].[sub_order_line_task] (
-    [task_id]                 UNIQUEIDENTIFIER NOT NULL,
-    [order_line_id]           UNIQUEIDENTIFIER NULL,
-    [movement_type_id]        INT              NULL,
-    [item_uom_id]             UNIQUEIDENTIFIER NULL,
-    [quantity]                DECIMAL (10, 2)  NULL,
-    [actual_quantity]         DECIMAL (10, 2)  NULL,
-    [source_location_id]      UNIQUEIDENTIFIER NULL,
-    [destination_location_id] UNIQUEIDENTIFIER NULL,
-    [task_state_id]           INT              NULL,
-    [assigned_to_user_id]     UNIQUEIDENTIFIER NULL,
-    [priority]                INT              NULL,
-    [validation_type_id]      INT              NULL,
-    [date_created_utc]        DATETIME         NULL,
-    [date_assigned_utc]       DATETIME         NULL,
-    [date_started_utc]        DATETIME         NULL,
-    [date_completed_utc]      DATETIME         NULL,
-    [notes]                   VARCHAR (500)    NULL,
-    PRIMARY KEY CLUSTERED ([task_id] ASC)
-);
-
-
-GO
-PRINT N'Creating Table [forge].[order_line]...';
-
-
-GO
-CREATE TABLE [forge].[order_line] (
-    [order_line_id]           UNIQUEIDENTIFIER NOT NULL,
-    [transfer_order_id]       UNIQUEIDENTIFIER NULL,
-    [item_uom_id]             UNIQUEIDENTIFIER NULL,
-    [requested_quantity]      DECIMAL (10, 2)  NULL,
-    [fulfilled_quantity]      DECIMAL (10, 2)  NULL,
-    [fill_method_id]          INT              NULL,
-    [movement_type_id]        INT              NULL,
-    [source_location_id]      UNIQUEIDENTIFIER NULL,
-    [destination_location_id] UNIQUEIDENTIFIER NULL,
-    [status_id]               INT              NULL,
-    [line_sequence]           INT              NULL,
-    [date_created_utc]        DATETIME         NULL,
-    [date_expected_utc]       DATETIME         NULL,
-    [date_completed_utc]      DATETIME         NULL,
-    PRIMARY KEY CLUSTERED ([order_line_id] ASC)
-);
-
-
-GO
-PRINT N'Creating Table [forge].[transfer_order]...';
-
-
-GO
-CREATE TABLE [forge].[transfer_order] (
-    [transfer_order_id]        UNIQUEIDENTIFIER NOT NULL,
-    [order_number]             VARCHAR (100)    NOT NULL,
-    [transfer_order_type_id]   INT              NULL,
-    [transfer_order_status_id] INT              NULL,
-    [source_location_id]       UNIQUEIDENTIFIER NULL,
-    [destination_location_id]  UNIQUEIDENTIFIER NULL,
-    [fill_method_id]           INT              NULL,
-    [priority]                 INT              NULL,
-    [date_created_utc]         DATETIME         NULL,
-    [date_expected_utc]        DATETIME         NULL,
-    [date_completed_utc]       DATETIME         NULL,
-    PRIMARY KEY CLUSTERED ([transfer_order_id] ASC)
 );
 
 
@@ -824,6 +761,23 @@ CREATE TABLE [forge].[batch_transfer_order] (
 
 
 GO
+PRINT N'Creating Table [forge].[batch]...';
+
+
+GO
+CREATE TABLE [forge].[batch] (
+    [batch_id]           UNIQUEIDENTIFIER NOT NULL,
+    [batch_name]         VARCHAR (100)    NULL,
+    [batch_type_id]      INT              NULL,
+    [batch_state_id]     INT              NULL,
+    [date_created_utc]   DATETIME         NULL,
+    [date_started_utc]   DATETIME         NULL,
+    [date_completed_utc] DATETIME         NULL,
+    PRIMARY KEY CLUSTERED ([batch_id] ASC)
+);
+
+
+GO
 PRINT N'Creating Table [forge].[fulfillment_assignment]...';
 
 
@@ -849,6 +803,78 @@ CREATE TABLE [forge].[fulfillment_method] (
     [description]           VARCHAR (255) NULL,
     PRIMARY KEY CLUSTERED ([fulfillment_method_id] ASC),
     UNIQUE NONCLUSTERED ([method_name] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [forge].[sub_order_line_task]...';
+
+
+GO
+CREATE TABLE [forge].[sub_order_line_task] (
+    [task_id]                 UNIQUEIDENTIFIER NOT NULL,
+    [order_line_id]           UNIQUEIDENTIFIER NULL,
+    [movement_type_id]        INT              NULL,
+    [item_uom_id]             UNIQUEIDENTIFIER NULL,
+    [quantity]                DECIMAL (10, 2)  NULL,
+    [actual_quantity]         DECIMAL (10, 2)  NULL,
+    [source_location_id]      UNIQUEIDENTIFIER NULL,
+    [destination_location_id] UNIQUEIDENTIFIER NULL,
+    [task_state_id]           INT              NULL,
+    [assigned_to_user_id]     UNIQUEIDENTIFIER NULL,
+    [priority]                INT              NULL,
+    [validation_type_id]      INT              NULL,
+    [date_created_utc]        DATETIME         NULL,
+    [date_assigned_utc]       DATETIME         NULL,
+    [date_started_utc]        DATETIME         NULL,
+    [date_completed_utc]      DATETIME         NULL,
+    [notes]                   VARCHAR (500)    NULL,
+    PRIMARY KEY CLUSTERED ([task_id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [forge].[order_line]...';
+
+
+GO
+CREATE TABLE [forge].[order_line] (
+    [order_line_id]           UNIQUEIDENTIFIER NOT NULL,
+    [transfer_order_id]       UNIQUEIDENTIFIER NULL,
+    [item_uom_id]             UNIQUEIDENTIFIER NULL,
+    [requested_quantity]      DECIMAL (10, 2)  NULL,
+    [fulfilled_quantity]      DECIMAL (10, 2)  NULL,
+    [fill_method_id]          INT              NULL,
+    [movement_type_id]        INT              NULL,
+    [source_location_id]      UNIQUEIDENTIFIER NULL,
+    [destination_location_id] UNIQUEIDENTIFIER NULL,
+    [status_id]               INT              NULL,
+    [line_sequence]           INT              NULL,
+    [date_created_utc]        DATETIME         NULL,
+    [date_expected_utc]       DATETIME         NULL,
+    [date_completed_utc]      DATETIME         NULL,
+    PRIMARY KEY CLUSTERED ([order_line_id] ASC)
+);
+
+
+GO
+PRINT N'Creating Table [forge].[transfer_order]...';
+
+
+GO
+CREATE TABLE [forge].[transfer_order] (
+    [transfer_order_id]        UNIQUEIDENTIFIER NOT NULL,
+    [order_number]             VARCHAR (100)    NOT NULL,
+    [transfer_order_type_id]   INT              NULL,
+    [transfer_order_status_id] INT              NULL,
+    [source_location_id]       UNIQUEIDENTIFIER NULL,
+    [destination_location_id]  UNIQUEIDENTIFIER NULL,
+    [fill_method_id]           INT              NULL,
+    [priority]                 INT              NULL,
+    [date_created_utc]         DATETIME         NULL,
+    [date_expected_utc]        DATETIME         NULL,
+    [date_completed_utc]       DATETIME         NULL,
+    PRIMARY KEY CLUSTERED ([transfer_order_id] ASC)
 );
 
 
@@ -885,19 +911,27 @@ CREATE TABLE [forge].[stock] (
 
 
 GO
-PRINT N'Creating Table [forge].[batch]...';
+PRINT N'Creating Table [core].[transaction_log]...';
 
 
 GO
-CREATE TABLE [forge].[batch] (
-    [batch_id]           UNIQUEIDENTIFIER NOT NULL,
-    [batch_name]         VARCHAR (100)    NULL,
-    [batch_type_id]      INT              NULL,
-    [batch_state_id]     INT              NULL,
-    [date_created_utc]   DATETIME         NULL,
-    [date_started_utc]   DATETIME         NULL,
-    [date_completed_utc] DATETIME         NULL,
-    PRIMARY KEY CLUSTERED ([batch_id] ASC)
+CREATE TABLE [core].[transaction_log] (
+    [transaction_log_id] UNIQUEIDENTIFIER NOT NULL,
+    [logging_id]         UNIQUEIDENTIFIER NOT NULL,
+    [source_system]      VARCHAR (50)     NOT NULL,
+    [user_id]            UNIQUEIDENTIFIER NULL,
+    [event_timestamp]    DATETIME         NOT NULL,
+    [object_name]        VARCHAR (100)    NOT NULL,
+    [object_id]          UNIQUEIDENTIFIER NULL,
+    [action_type_id]     INT              NULL,
+    [status_code_id]     INT              NULL,
+    [data_before]        NVARCHAR (MAX)   NULL,
+    [data_after]         NVARCHAR (MAX)   NULL,
+    [diff_data]          NVARCHAR (MAX)   NULL,
+    [message]            NVARCHAR (1000)  NULL,
+    [context_id]         UNIQUEIDENTIFIER NULL,
+    [created_utc]        DATETIME         NOT NULL,
+    PRIMARY KEY CLUSTERED ([transaction_log_id] ASC)
 );
 
 
@@ -1019,31 +1053,6 @@ CREATE TABLE [core].[lpn_state] (
     [description]  VARCHAR (255) NULL,
     PRIMARY KEY CLUSTERED ([lpn_state_id] ASC),
     UNIQUE NONCLUSTERED ([state_code] ASC)
-);
-
-
-GO
-PRINT N'Creating Table [core].[transaction_log]...';
-
-
-GO
-CREATE TABLE [core].[transaction_log] (
-    [transaction_log_id] UNIQUEIDENTIFIER NOT NULL,
-    [logging_id]         UNIQUEIDENTIFIER NOT NULL,
-    [source_system]      VARCHAR (50)     NOT NULL,
-    [user_id]            UNIQUEIDENTIFIER NULL,
-    [event_timestamp]    DATETIME         NOT NULL,
-    [object_name]        VARCHAR (100)    NOT NULL,
-    [object_id]          UNIQUEIDENTIFIER NULL,
-    [action_type_id]     INT              NULL,
-    [status_code_id]     INT              NULL,
-    [data_before]        NVARCHAR (MAX)   NULL,
-    [data_after]         NVARCHAR (MAX)   NULL,
-    [diff_data]          NVARCHAR (MAX)   NULL,
-    [message]            NVARCHAR (1000)  NULL,
-    [context_id]         UNIQUEIDENTIFIER NULL,
-    [created_utc]        DATETIME         NOT NULL,
-    PRIMARY KEY CLUSTERED ([transaction_log_id] ASC)
 );
 
 
@@ -1192,114 +1201,6 @@ ALTER TABLE [forge].[inventory_document]
 
 
 GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[sub_order_line_task]...';
-
-
-GO
-ALTER TABLE [forge].[sub_order_line_task]
-    ADD FOREIGN KEY ([item_uom_id]) REFERENCES [forge].[item_uom] ([item_uom_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[sub_order_line_task]...';
-
-
-GO
-ALTER TABLE [forge].[sub_order_line_task]
-    ADD FOREIGN KEY ([movement_type_id]) REFERENCES [forge].[movement_type] ([movement_type_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[sub_order_line_task]...';
-
-
-GO
-ALTER TABLE [forge].[sub_order_line_task]
-    ADD FOREIGN KEY ([order_line_id]) REFERENCES [forge].[order_line] ([order_line_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[sub_order_line_task]...';
-
-
-GO
-ALTER TABLE [forge].[sub_order_line_task]
-    ADD FOREIGN KEY ([task_state_id]) REFERENCES [forge].[task_state] ([task_state_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[sub_order_line_task]...';
-
-
-GO
-ALTER TABLE [forge].[sub_order_line_task]
-    ADD FOREIGN KEY ([validation_type_id]) REFERENCES [forge].[validation_type] ([validation_type_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[order_line]...';
-
-
-GO
-ALTER TABLE [forge].[order_line]
-    ADD FOREIGN KEY ([item_uom_id]) REFERENCES [forge].[item_uom] ([item_uom_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[order_line]...';
-
-
-GO
-ALTER TABLE [forge].[order_line]
-    ADD FOREIGN KEY ([movement_type_id]) REFERENCES [forge].[movement_type] ([movement_type_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[order_line]...';
-
-
-GO
-ALTER TABLE [forge].[order_line]
-    ADD FOREIGN KEY ([status_id]) REFERENCES [forge].[transfer_order_status] ([transfer_order_status_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[order_line]...';
-
-
-GO
-ALTER TABLE [forge].[order_line]
-    ADD FOREIGN KEY ([transfer_order_id]) REFERENCES [forge].[transfer_order] ([transfer_order_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[transfer_order]...';
-
-
-GO
-ALTER TABLE [forge].[transfer_order]
-    ADD FOREIGN KEY ([fill_method_id]) REFERENCES [forge].[fill_method] ([fill_method_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[transfer_order]...';
-
-
-GO
-ALTER TABLE [forge].[transfer_order]
-    ADD FOREIGN KEY ([transfer_order_type_id]) REFERENCES [forge].[transfer_order_type] ([transfer_order_type_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[transfer_order]...';
-
-
-GO
-ALTER TABLE [forge].[transfer_order]
-    ADD FOREIGN KEY ([transfer_order_status_id]) REFERENCES [forge].[transfer_order_status] ([transfer_order_status_id]);
-
-
-GO
 PRINT N'Creating Foreign Key unnamed constraint on [forge].[location_type_compatibility]...';
 
 
@@ -1417,12 +1318,138 @@ ALTER TABLE [forge].[batch_transfer_order]
 
 
 GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[batch]...';
+
+
+GO
+ALTER TABLE [forge].[batch]
+    ADD FOREIGN KEY ([batch_type_id]) REFERENCES [forge].[batch_type] ([batch_type_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[batch]...';
+
+
+GO
+ALTER TABLE [forge].[batch]
+    ADD FOREIGN KEY ([batch_state_id]) REFERENCES [forge].[batch_state] ([batch_state_id]);
+
+
+GO
 PRINT N'Creating Foreign Key unnamed constraint on [forge].[fulfillment_assignment]...';
 
 
 GO
 ALTER TABLE [forge].[fulfillment_assignment]
     ADD FOREIGN KEY ([fulfillment_method_id]) REFERENCES [forge].[fulfillment_method] ([fulfillment_method_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[sub_order_line_task]...';
+
+
+GO
+ALTER TABLE [forge].[sub_order_line_task]
+    ADD FOREIGN KEY ([item_uom_id]) REFERENCES [forge].[item_uom] ([item_uom_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[sub_order_line_task]...';
+
+
+GO
+ALTER TABLE [forge].[sub_order_line_task]
+    ADD FOREIGN KEY ([movement_type_id]) REFERENCES [forge].[movement_type] ([movement_type_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[sub_order_line_task]...';
+
+
+GO
+ALTER TABLE [forge].[sub_order_line_task]
+    ADD FOREIGN KEY ([order_line_id]) REFERENCES [forge].[order_line] ([order_line_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[sub_order_line_task]...';
+
+
+GO
+ALTER TABLE [forge].[sub_order_line_task]
+    ADD FOREIGN KEY ([task_state_id]) REFERENCES [forge].[task_state] ([task_state_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[sub_order_line_task]...';
+
+
+GO
+ALTER TABLE [forge].[sub_order_line_task]
+    ADD FOREIGN KEY ([validation_type_id]) REFERENCES [forge].[validation_type] ([validation_type_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[order_line]...';
+
+
+GO
+ALTER TABLE [forge].[order_line]
+    ADD FOREIGN KEY ([item_uom_id]) REFERENCES [forge].[item_uom] ([item_uom_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[order_line]...';
+
+
+GO
+ALTER TABLE [forge].[order_line]
+    ADD FOREIGN KEY ([movement_type_id]) REFERENCES [forge].[movement_type] ([movement_type_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[order_line]...';
+
+
+GO
+ALTER TABLE [forge].[order_line]
+    ADD FOREIGN KEY ([status_id]) REFERENCES [forge].[transfer_order_status] ([transfer_order_status_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[order_line]...';
+
+
+GO
+ALTER TABLE [forge].[order_line]
+    ADD FOREIGN KEY ([transfer_order_id]) REFERENCES [forge].[transfer_order] ([transfer_order_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[transfer_order]...';
+
+
+GO
+ALTER TABLE [forge].[transfer_order]
+    ADD FOREIGN KEY ([fill_method_id]) REFERENCES [forge].[fill_method] ([fill_method_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[transfer_order]...';
+
+
+GO
+ALTER TABLE [forge].[transfer_order]
+    ADD FOREIGN KEY ([transfer_order_type_id]) REFERENCES [forge].[transfer_order_type] ([transfer_order_type_id]);
+
+
+GO
+PRINT N'Creating Foreign Key unnamed constraint on [forge].[transfer_order]...';
+
+
+GO
+ALTER TABLE [forge].[transfer_order]
+    ADD FOREIGN KEY ([transfer_order_status_id]) REFERENCES [forge].[transfer_order_status] ([transfer_order_status_id]);
 
 
 GO
@@ -1453,21 +1480,21 @@ ALTER TABLE [forge].[stock]
 
 
 GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[batch]...';
+PRINT N'Creating Foreign Key unnamed constraint on [core].[transaction_log]...';
 
 
 GO
-ALTER TABLE [forge].[batch]
-    ADD FOREIGN KEY ([batch_type_id]) REFERENCES [forge].[batch_type] ([batch_type_id]);
+ALTER TABLE [core].[transaction_log]
+    ADD FOREIGN KEY ([action_type_id]) REFERENCES [core].[transaction_action_type] ([action_type_id]);
 
 
 GO
-PRINT N'Creating Foreign Key unnamed constraint on [forge].[batch]...';
+PRINT N'Creating Foreign Key unnamed constraint on [core].[transaction_log]...';
 
 
 GO
-ALTER TABLE [forge].[batch]
-    ADD FOREIGN KEY ([batch_state_id]) REFERENCES [forge].[batch_state] ([batch_state_id]);
+ALTER TABLE [core].[transaction_log]
+    ADD FOREIGN KEY ([status_code_id]) REFERENCES [core].[status_code] ([status_code_id]);
 
 
 GO
@@ -1498,23 +1525,21 @@ ALTER TABLE [core].[lpn]
 
 
 GO
-PRINT N'Creating Foreign Key unnamed constraint on [core].[transaction_log]...';
+PRINT N'Creating View [api].[v_role_list]...';
 
 
 GO
-ALTER TABLE [core].[transaction_log]
-    ADD FOREIGN KEY ([action_type_id]) REFERENCES [core].[transaction_action_type] ([action_type_id]);
-
-
-GO
-PRINT N'Creating Foreign Key unnamed constraint on [core].[transaction_log]...';
-
-
-GO
-ALTER TABLE [core].[transaction_log]
-    ADD FOREIGN KEY ([status_code_id]) REFERENCES [core].[status_code] ([status_code_id]);
-
-
+CREATE VIEW [api].[v_role_list]
+AS
+SELECT 
+    r.role_id as roleId,
+    r.role as roleName,
+    COUNT(DISTINCT urm.user_id) as userCount,
+    COUNT(DISTINCT rcm.claim_id) as claimCount
+FROM auth.roles r
+LEFT JOIN auth.user_role_mapping urm ON r.role_id = urm.role_id
+LEFT JOIN auth.role_claim_mapping rcm ON r.role_id = rcm.role_id
+GROUP BY r.role_id, r.role;
 GO
 PRINT N'Creating Procedure [core].[sp_log_transaction]...';
 
@@ -2772,27 +2797,788 @@ BEGIN
             @p_context_id = NULL,
             @p_return_result_ok = @p_return_result_ok OUTPUT,
             @p_return_result_message = @p_return_result_message OUTPUT,
-            @p_loggingid_out = @l_transaction_log_id OUTPUT;
+            @p_logging_id_out = @l_transaction_log_id OUTPUT;
     END CATCH
 END
 GO
-PRINT N'Creating Procedure [forge].[sp_upsert_batch_state]...';
+PRINT N'Creating Procedure [auth].[sp_upsert_access_level_map]...';
 
 
 GO
 /***************************************************************************************
-  Procedure: sp_upsert_batch_state
-  PK: batch_state_id (INT)
+  Procedure: sp_upsert_access_level_map
+  PK: access_level_id (INT - IDENTITY)
 ***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_batch_state
+CREATE PROCEDURE auth.sp_upsert_access_level_map
 (
     @p_record_id INT = NULL,
     @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
-    -- Table columns
-    @p_batch_state_name VARCHAR(50),
-    @p_description VARCHAR(255) = NULL,
+    -- Table-specific columns
+    @p_level INT,
+    @p_lvl_description VARCHAR(32),
+
+    -- Outputs
+    @p_return_result_ok BIT OUTPUT,
+    @p_return_result_message NVARCHAR(MAX) OUTPUT
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
+
+    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
+    DECLARE @l_exists BIT = 0;
+    DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX) = NULL;
+    DECLARE @l_data_after NVARCHAR(MAX) = NULL;
+    DECLARE @l_diff_data NVARCHAR(MAX) = NULL;
+
+    IF @p_record_id IS NOT NULL
+       AND EXISTS(SELECT 1 FROM auth.access_level_map WHERE access_level_id = @p_record_id)
+    BEGIN
+        SET @l_exists = 1;
+    END
+
+    BEGIN TRY
+        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
+        BEGIN
+            -- Capture data before delete
+            SELECT @l_data_before = (
+                SELECT 
+                    access_level_id,
+                    [level],
+                    lvl_description
+                FROM auth.access_level_map 
+                WHERE access_level_id = @p_record_id
+                FOR JSON PATH
+            );
+            
+            DELETE FROM auth.access_level_map
+            WHERE access_level_id = @p_record_id;
+
+            SET @l_action_type_id = 3;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'AUTH',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'access_level_map',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
+                @p_message = 'Deleted from access_level_map',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE IF @l_exists = 1
+        BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    access_level_id,
+                    [level],
+                    lvl_description
+                FROM auth.access_level_map 
+                WHERE access_level_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            UPDATE auth.access_level_map
+            SET
+                [level] = @p_level,
+                lvl_description = @p_lvl_description
+            WHERE access_level_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    access_level_id,
+                    [level],
+                    lvl_description
+                FROM auth.access_level_map 
+                WHERE access_level_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+            WITH DiffData AS (
+                SELECT 
+                    'level' as [field],
+                    CAST(JSON_VALUE(@l_data_before, '$[0].level') AS VARCHAR(32)) as [old_value],
+                    CAST(JSON_VALUE(@l_data_after, '$[0].level') AS VARCHAR(32)) as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].level') <> JSON_VALUE(@l_data_after, '$[0].level')
+                UNION ALL
+                SELECT 
+                    'lvl_description' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].lvl_description') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].lvl_description') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].lvl_description') <> JSON_VALUE(@l_data_after, '$[0].lvl_description')
+            )
+            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
+
+            SET @l_action_type_id = 2;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'AUTH',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'access_level_map',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated access_level_map',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE
+        BEGIN
+            -- For insert, we don't specify access_level_id as it's IDENTITY
+            INSERT INTO auth.access_level_map
+            (
+                [level],
+                lvl_description
+            )
+            VALUES
+            (
+                @p_level,
+                @p_lvl_description
+            );
+
+            -- Get the generated access_level_id for logging
+            SET @p_record_id = SCOPE_IDENTITY();
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    access_level_id,
+                    [level],
+                    lvl_description
+                FROM auth.access_level_map 
+                WHERE access_level_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            SET @l_action_type_id = 1;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'AUTH',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'access_level_map',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = NULL,
+                @p_data_after = @l_data_after,
+                @p_diff_data = NULL,
+                @p_message = 'Inserted into access_level_map',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+
+        SET @p_return_result_ok = 1;
+        SET @p_return_result_message = 'Success';
+    END TRY
+    BEGIN CATCH
+        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
+        DECLARE @l_err_number INT = ERROR_NUMBER();
+        DECLARE @l_err_line INT = ERROR_LINE();
+        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
+        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
+
+        SET @p_return_result_ok = 0;
+        SET @p_return_result_message = CONCAT(
+            'Error: ', @l_err_message,
+            ' (Line ', @l_err_line,
+            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
+            ', Error: ', @l_err_number, ')'
+        );
+
+        EXEC core.sp_log_transaction
+            @p_logging_id = @l_transaction_log_id,
+            @p_source_system = 'AUTH',
+            @p_user_id = @p_created_by_user_id,
+            @p_object_name = 'access_level_map',
+            @p_object_id = @p_record_id,
+            @p_action_type_id = 4, -- Error
+            @p_status_code_id = 2, -- Error
+            @p_data_before = NULL,
+            @p_data_after = NULL,
+            @p_diff_data = NULL,
+            @p_message = @p_return_result_message,
+            @p_context_id = NULL,
+            @p_return_result_ok = @p_return_result_ok OUTPUT,
+            @p_return_result_message = @p_return_result_message OUTPUT,
+            @p_logging_id_out = @l_transaction_log_id OUTPUT;
+
+        THROW;
+    END CATCH
+END;
+GO
+PRINT N'Creating Procedure [auth].[sp_upsert_user_sessions]...';
+
+
+GO
+/***************************************************************************************
+  Procedure: sp_upsert_user_sessions
+  PK: session_id (INT - IDENTITY)
+***************************************************************************************/
+CREATE PROCEDURE auth.sp_upsert_user_sessions
+(
+    @p_record_id INT = NULL,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_is_delete BIT = 0,
+
+    -- Table-specific columns
+    @p_user_id UNIQUEIDENTIFIER,
+    @p_session_token VARCHAR(2000),
+    @p_refresh_token VARCHAR(244),
+    @p_date_expires_utc DATETIME,
+    @p_date_created_utc DATETIME = NULL, -- Optional, will default to GETUTCDATE() for new records
+
+    -- Outputs
+    @p_return_result_ok BIT OUTPUT,
+    @p_return_result_message NVARCHAR(MAX) OUTPUT
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
+
+    -- Set date_created_utc to current UTC time if not provided
+    IF @p_date_created_utc IS NULL
+        SET @p_date_created_utc = GETUTCDATE();
+
+    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
+    DECLARE @l_exists BIT = 0;
+    DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX) = NULL;
+    DECLARE @l_data_after NVARCHAR(MAX) = NULL;
+    DECLARE @l_diff_data NVARCHAR(MAX) = NULL;
+
+    IF @p_record_id IS NOT NULL
+       AND EXISTS(SELECT 1 FROM auth.user_sessions WHERE session_id = @p_record_id)
+    BEGIN
+        SET @l_exists = 1;
+    END
+
+    BEGIN TRY
+        -- Validate foreign key constraint
+        IF NOT EXISTS (SELECT 1 FROM auth.users WHERE user_id = @p_user_id)
+        BEGIN
+            THROW 51000, 'The specified user_id does not exist in the users table.', 1;
+        END
+
+        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
+        BEGIN
+            -- Capture data before delete
+            SELECT @l_data_before = (
+                SELECT 
+                    session_id,
+                    user_id,
+                    session_token,
+                    refresh_token,
+                    date_expires_utc,
+                    date_created_utc
+                FROM auth.user_sessions 
+                WHERE session_id = @p_record_id
+                FOR JSON PATH
+            );
+            
+            DELETE FROM auth.user_sessions
+            WHERE session_id = @p_record_id;
+
+            SET @l_action_type_id = 3;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'AUTH',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'user_sessions',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
+                @p_message = 'Deleted from user_sessions',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE IF @l_exists = 1
+        BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    session_id,
+                    user_id,
+                    session_token,
+                    refresh_token,
+                    date_expires_utc,
+                    date_created_utc
+                FROM auth.user_sessions 
+                WHERE session_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            UPDATE auth.user_sessions
+            SET
+                user_id = @p_user_id,
+                session_token = @p_session_token,
+                refresh_token = @p_refresh_token,
+                date_expires_utc = @p_date_expires_utc,
+                date_created_utc = @p_date_created_utc
+            WHERE session_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    session_id,
+                    user_id,
+                    session_token,
+                    refresh_token,
+                    date_expires_utc,
+                    date_created_utc
+                FROM auth.user_sessions 
+                WHERE session_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+            WITH DiffData AS (
+                SELECT 
+                    'user_id' as [field],
+                    CAST(JSON_VALUE(@l_data_before, '$[0].user_id') AS VARCHAR(36)) as [old_value],
+                    CAST(JSON_VALUE(@l_data_after, '$[0].user_id') AS VARCHAR(36)) as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].user_id') <> JSON_VALUE(@l_data_after, '$[0].user_id')
+                UNION ALL
+                SELECT 
+                    'session_token' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].session_token') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].session_token') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].session_token') <> JSON_VALUE(@l_data_after, '$[0].session_token')
+                UNION ALL
+                SELECT 
+                    'refresh_token' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].refresh_token') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].refresh_token') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].refresh_token') <> JSON_VALUE(@l_data_after, '$[0].refresh_token')
+                UNION ALL
+                SELECT 
+                    'date_expires_utc' as [field],
+                    CAST(JSON_VALUE(@l_data_before, '$[0].date_expires_utc') AS VARCHAR(50)) as [old_value],
+                    CAST(JSON_VALUE(@l_data_after, '$[0].date_expires_utc') AS VARCHAR(50)) as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].date_expires_utc') <> JSON_VALUE(@l_data_after, '$[0].date_expires_utc')
+                UNION ALL
+                SELECT 
+                    'date_created_utc' as [field],
+                    CAST(JSON_VALUE(@l_data_before, '$[0].date_created_utc') AS VARCHAR(50)) as [old_value],
+                    CAST(JSON_VALUE(@l_data_after, '$[0].date_created_utc') AS VARCHAR(50)) as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].date_created_utc') <> JSON_VALUE(@l_data_after, '$[0].date_created_utc')
+            )
+            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
+
+            SET @l_action_type_id = 2;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'AUTH',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'user_sessions',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated user_sessions',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE
+        BEGIN
+            -- For insert, we don't specify session_id as it's IDENTITY
+            INSERT INTO auth.user_sessions
+            (
+                user_id,
+                session_token,
+                refresh_token,
+                date_expires_utc,
+                date_created_utc
+            )
+            VALUES
+            (
+                @p_user_id,
+                @p_session_token,
+                @p_refresh_token,
+                @p_date_expires_utc,
+                @p_date_created_utc
+            );
+
+            -- Get the generated session_id for logging
+            SET @p_record_id = SCOPE_IDENTITY();
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    session_id,
+                    user_id,
+                    session_token,
+                    refresh_token,
+                    date_expires_utc,
+                    date_created_utc
+                FROM auth.user_sessions 
+                WHERE session_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            SET @l_action_type_id = 1;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'AUTH',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'user_sessions',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = NULL,
+                @p_data_after = @l_data_after,
+                @p_diff_data = NULL,
+                @p_message = 'Inserted into user_sessions',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+
+        SET @p_return_result_ok = 1;
+        SET @p_return_result_message = 'Success';
+    END TRY
+    BEGIN CATCH
+        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
+        DECLARE @l_err_number INT = ERROR_NUMBER();
+        DECLARE @l_err_line INT = ERROR_LINE();
+        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
+        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
+
+        SET @p_return_result_ok = 0;
+        SET @p_return_result_message = CONCAT(
+            'Error: ', @l_err_message,
+            ' (Line ', @l_err_line,
+            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
+            ', Error: ', @l_err_number, ')'
+        );
+
+        EXEC core.sp_log_transaction
+            @p_logging_id = @l_transaction_log_id,
+            @p_source_system = 'AUTH',
+            @p_user_id = @p_created_by_user_id,
+            @p_object_name = 'user_sessions',
+            @p_object_id = @p_record_id,
+            @p_action_type_id = 4, -- Error
+            @p_status_code_id = 2, -- Error
+            @p_data_before = NULL,
+            @p_data_after = NULL,
+            @p_diff_data = NULL,
+            @p_message = @p_return_result_message,
+            @p_context_id = NULL,
+            @p_return_result_ok = @p_return_result_ok OUTPUT,
+            @p_return_result_message = @p_return_result_message OUTPUT,
+            @p_logging_id_out = @l_transaction_log_id OUTPUT;
+
+        THROW;
+    END CATCH
+END;
+GO
+PRINT N'Creating Procedure [auth].[sp_upsert_claim_list]...';
+
+
+GO
+/***************************************************************************************
+  Procedure: sp_upsert_claim_list
+  PK: claim_id (INT - IDENTITY)
+***************************************************************************************/
+CREATE PROCEDURE auth.sp_upsert_claim_list
+(
+    @p_record_id INT = NULL,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_is_delete BIT = 0,
+
+    -- Table-specific columns
+    @p_claim_name VARCHAR(32),
+
+    -- Outputs
+    @p_return_result_ok BIT OUTPUT,
+    @p_return_result_message NVARCHAR(MAX) OUTPUT
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
+
+    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
+    DECLARE @l_exists BIT = 0;
+    DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX) = NULL;
+    DECLARE @l_data_after NVARCHAR(MAX) = NULL;
+    DECLARE @l_diff_data NVARCHAR(MAX) = NULL;
+
+    IF @p_record_id IS NOT NULL
+       AND EXISTS(SELECT 1 FROM auth.claim_list WHERE claim_id = @p_record_id)
+    BEGIN
+        SET @l_exists = 1;
+    END
+
+    BEGIN TRY
+        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
+        BEGIN
+            -- Check for role_claim_mapping dependencies before delete
+            IF EXISTS (SELECT 1 FROM auth.role_claim_mapping WHERE claim_id = @p_record_id)
+            BEGIN
+                SET @p_return_result_ok = 0;
+                SET @p_return_result_message = 'Cannot delete claim because it is referenced by role_claim_mapping records.';
+
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'AUTH',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'claim_list',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = 4, -- Error
+                    @p_status_code_id = 2, -- Error
+                    @p_data_before = NULL,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = @p_return_result_message,
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+
+                RETURN;
+            END
+
+            -- Capture data before delete
+            SELECT @l_data_before = (
+                SELECT 
+                    claim_id,
+                    claim_name
+                FROM auth.claim_list 
+                WHERE claim_id = @p_record_id
+                FOR JSON PATH
+            );
+            
+            DELETE FROM auth.claim_list
+            WHERE claim_id = @p_record_id;
+
+            SET @l_action_type_id = 3;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'AUTH',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'claim_list',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
+                @p_message = 'Deleted from claim_list',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE IF @l_exists = 1
+        BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    claim_id,
+                    claim_name
+                FROM auth.claim_list 
+                WHERE claim_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            UPDATE auth.claim_list
+            SET
+                claim_name = @p_claim_name
+            WHERE claim_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    claim_id,
+                    claim_name
+                FROM auth.claim_list 
+                WHERE claim_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+            WITH DiffData AS (
+                SELECT 
+                    'claim_name' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].claim_name') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].claim_name') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].claim_name') <> JSON_VALUE(@l_data_after, '$[0].claim_name')
+                    OR (JSON_VALUE(@l_data_before, '$[0].claim_name') IS NULL AND JSON_VALUE(@l_data_after, '$[0].claim_name') IS NOT NULL)
+                    OR (JSON_VALUE(@l_data_before, '$[0].claim_name') IS NOT NULL AND JSON_VALUE(@l_data_after, '$[0].claim_name') IS NULL)
+            )
+            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
+
+            SET @l_action_type_id = 2;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'AUTH',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'claim_list',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated claim_list',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE
+        BEGIN
+            -- For insert, we don't specify claim_id as it's IDENTITY
+            INSERT INTO auth.claim_list
+            (
+                claim_name
+            )
+            VALUES
+            (
+                @p_claim_name
+            );
+
+            -- Get the generated claim_id for logging
+            SET @p_record_id = SCOPE_IDENTITY();
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    claim_id,
+                    claim_name
+                FROM auth.claim_list 
+                WHERE claim_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            SET @l_action_type_id = 1;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'AUTH',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'claim_list',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = NULL,
+                @p_data_after = @l_data_after,
+                @p_diff_data = NULL,
+                @p_message = 'Inserted into claim_list',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+
+        SET @p_return_result_ok = 1;
+        SET @p_return_result_message = 'Success';
+    END TRY
+    BEGIN CATCH
+        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
+        DECLARE @l_err_number INT = ERROR_NUMBER();
+        DECLARE @l_err_line INT = ERROR_LINE();
+        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
+        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
+
+        SET @p_return_result_ok = 0;
+        SET @p_return_result_message = CONCAT(
+            'Error: ', @l_err_message,
+            ' (Line ', @l_err_line,
+            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
+            ', Error: ', @l_err_number, ')'
+        );
+
+        EXEC core.sp_log_transaction
+            @p_logging_id = @l_transaction_log_id,
+            @p_source_system = 'AUTH',
+            @p_user_id = @p_created_by_user_id,
+            @p_object_name = 'claim_list',
+            @p_object_id = @p_record_id,
+            @p_action_type_id = 4, -- Error
+            @p_status_code_id = 2, -- Error
+            @p_data_before = NULL,
+            @p_data_after = NULL,
+            @p_diff_data = NULL,
+            @p_message = @p_return_result_message,
+            @p_context_id = NULL,
+            @p_return_result_ok = @p_return_result_ok OUTPUT,
+            @p_return_result_message = @p_return_result_message OUTPUT,
+            @p_logging_id_out = @l_transaction_log_id OUTPUT;
+
+        THROW;
+    END CATCH
+END;
+GO
+PRINT N'Creating Procedure [forge].[sp_upsert_fulfillment_assignment]...';
+
+
+GO
+/***************************************************************************************
+  Procedure: sp_upsert_fulfillment_assignment
+  PK: assignment_id
+***************************************************************************************/
+CREATE PROCEDURE forge.sp_upsert_fulfillment_assignment
+(
+    @p_record_id UNIQUEIDENTIFIER = NULL,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_is_delete BIT = 0,
+
+    -- Table-specific columns
+    @p_transfer_order_id UNIQUEIDENTIFIER,
+    @p_order_line_id UNIQUEIDENTIFIER,
+    @p_fulfillment_method_id INT,
+    @p_precedence_order INT,
 
     -- Outputs
     @p_return_result_ok BIT OUTPUT,
@@ -2814,27 +3600,30 @@ BEGIN
     DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF @p_record_id IS NOT NULL
-       AND EXISTS (SELECT 1 FROM forge.batch_state WHERE batch_state_id = @p_record_id)
+       AND EXISTS(SELECT 1 FROM forge.fulfillment_assignment WHERE fulfillment_assignment_id = @p_record_id)
     BEGIN
         SET @l_exists = 1;
     END
 
     BEGIN TRY
+
         IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
         BEGIN
             -- Capture data before deletion
             SELECT @l_data_before = (
                 SELECT 
-                    batch_state_id,
-                    batch_state_name,
-                    description
-                FROM forge.batch_state 
-                WHERE batch_state_id = @p_record_id
+                    fulfillment_assignment_id,
+                    transfer_order_id,
+                    order_line_id,
+                    fulfillment_method_id,
+                    precedence_order
+                FROM forge.fulfillment_assignment 
+                WHERE fulfillment_assignment_id = @p_record_id
                 FOR JSON PATH
             );
             
-            DELETE FROM forge.batch_state
-            WHERE batch_state_id = @p_record_id;
+            DELETE FROM forge.fulfillment_assignment
+            WHERE fulfillment_assignment_id = @p_record_id;
 
             SET @l_action_type_id = 3;
 
@@ -2844,14 +3633,14 @@ BEGIN
                     @p_logging_id = @l_log_id,
                     @p_source_system = 'FORGE',
                     @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'batch_state',
+                    @p_object_name = 'fulfillment_assignment',
                     @p_object_id = @p_record_id,
                     @p_action_type_id = @l_action_type_id,
                     @p_status_code_id = 1,
                     @p_data_before = @l_data_before,
                     @p_data_after = NULL,
                     @p_diff_data = NULL,
-                    @p_message = 'Deleted from batch_state',
+                    @p_message = 'Deleted from fulfillment_assignment',
                     @p_context_id = NULL,
                     @p_return_result_ok = @p_return_result_ok OUTPUT,
                     @p_return_result_message = @p_return_result_message OUTPUT,
@@ -2863,46 +3652,64 @@ BEGIN
             -- Capture data before update
             SELECT @l_data_before = (
                 SELECT 
-                    batch_state_id,
-                    batch_state_name,
-                    description
-                FROM forge.batch_state 
-                WHERE batch_state_id = @p_record_id
+                    fulfillment_assignment_id,
+                    transfer_order_id,
+                    order_line_id,
+                    fulfillment_method_id,
+                    precedence_order
+                FROM forge.fulfillment_assignment 
+                WHERE fulfillment_assignment_id = @p_record_id
                 FOR JSON PATH
             );
 
-            UPDATE forge.batch_state
+            UPDATE forge.fulfillment_assignment
             SET
-                batch_state_name = @p_batch_state_name,
-                description = @p_description
-            WHERE batch_state_id = @p_record_id;
+                transfer_order_id = @p_transfer_order_id,
+                order_line_id = @p_order_line_id,
+                fulfillment_method_id = @p_fulfillment_method_id,
+                precedence_order = @p_precedence_order
+            WHERE fulfillment_assignment_id = @p_record_id;
 
             -- Capture data after update
             SELECT @l_data_after = (
                 SELECT 
-                    batch_state_id,
-                    batch_state_name,
-                    description
-                FROM forge.batch_state 
-                WHERE batch_state_id = @p_record_id
+                    fulfillment_assignment_id,
+                    transfer_order_id,
+                    order_line_id,
+                    fulfillment_method_id,
+                    precedence_order
+                FROM forge.fulfillment_assignment 
+                WHERE fulfillment_assignment_id = @p_record_id
                 FOR JSON PATH
             );
 
             -- Generate diff data
             WITH DiffData AS (
                 SELECT 
-                    'batch_state_name' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].batch_state_name') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].batch_state_name') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].batch_state_name') <> JSON_VALUE(@l_data_after, '$[0].batch_state_name')
+                    'transfer_order_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].transfer_order_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].transfer_order_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].transfer_order_id') <> JSON_VALUE(@l_data_after, '$[0].transfer_order_id')
                 UNION ALL
                 SELECT 
-                    'description' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].description') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].description') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].description') <> JSON_VALUE(@l_data_after, '$[0].description')
+                    'order_line_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].order_line_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].order_line_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].order_line_id') <> JSON_VALUE(@l_data_after, '$[0].order_line_id')
+                UNION ALL
+                SELECT 
+                    'fulfillment_method_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].fulfillment_method_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].fulfillment_method_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].fulfillment_method_id') <> JSON_VALUE(@l_data_after, '$[0].fulfillment_method_id')
+                UNION ALL
+                SELECT 
+                    'precedence_order' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].precedence_order') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].precedence_order') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].precedence_order') <> JSON_VALUE(@l_data_after, '$[0].precedence_order')
             )
-            SELECT @l_diff_data = (SELECT * FROM DiffData FOR JSON PATH);
+            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
 
             SET @l_action_type_id = 2;
 
@@ -2910,14 +3717,14 @@ BEGIN
                 @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch_state',
+                @p_object_name = 'fulfillment_assignment',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = @l_data_before,
                 @p_data_after = @l_data_after,
                 @p_diff_data = @l_diff_data,
-                @p_message = 'Updated batch_state',
+                @p_message = 'Updated fulfillment_assignment',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -2926,33 +3733,35 @@ BEGIN
         ELSE
         BEGIN
             IF @p_record_id IS NULL
-            BEGIN
-                -- Get the next available ID
-                SELECT @p_record_id = ISNULL(MAX(batch_state_id), 0) + 1
-                FROM forge.batch_state;
-            END
+                SET @p_record_id = NEWID();
 
-            INSERT INTO forge.batch_state
+            INSERT INTO forge.fulfillment_assignment
             (
-                batch_state_id,
-                batch_state_name,
-                description
+                fulfillment_assignment_id,
+                transfer_order_id,
+                order_line_id,
+                fulfillment_method_id,
+                precedence_order
             )
             VALUES
             (
                 @p_record_id,
-                @p_batch_state_name,
-                @p_description
+                @p_transfer_order_id,
+                @p_order_line_id,
+                @p_fulfillment_method_id,
+                @p_precedence_order
             );
 
             -- Capture data after insert
             SELECT @l_data_after = (
                 SELECT 
-                    batch_state_id,
-                    batch_state_name,
-                    description
-                FROM forge.batch_state 
-                WHERE batch_state_id = @p_record_id
+                    fulfillment_assignment_id,
+                    transfer_order_id,
+                    order_line_id,
+                    fulfillment_method_id,
+                    precedence_order
+                FROM forge.fulfillment_assignment 
+                WHERE fulfillment_assignment_id = @p_record_id
                 FOR JSON PATH
             );
 
@@ -2962,14 +3771,14 @@ BEGIN
                 @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch_state',
+                @p_object_name = 'fulfillment_assignment',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = NULL,
                 @p_data_after = @l_data_after,
                 @p_diff_data = NULL,
-                @p_message = 'Inserted into batch_state',
+                @p_message = 'Inserted into fulfillment_assignment',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -2992,23 +3801,21 @@ BEGIN
             ', Error: ', @l_err_number, ')'
         );
 
-        -- Decide action type based on what we were attempting
         SET @l_action_type_id = CASE
-            WHEN @p_is_delete = 1 THEN 3   -- was trying to delete
-            WHEN @l_exists = 1 THEN 2      -- was trying to update
-            ELSE 1                         -- was trying to insert
+            WHEN @p_is_delete = 1 THEN 3
+            WHEN @l_exists = 1 THEN 2
+            ELSE 1
         END;
 
-        -- Attempt to log the fail
         BEGIN TRY
             EXEC core.sp_log_transaction
                 @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch_state',
+                @p_object_name = 'fulfillment_assignment',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,  -- FAILED
+                @p_status_code_id = 2,
                 @p_data_before = NULL,
                 @p_data_after = NULL,
                 @p_diff_data = NULL,
@@ -3019,27 +3826,26 @@ BEGIN
                 @p_logging_id_out = NULL;
         END TRY
         BEGIN CATCH
-            -- Suppress nested logging failure to avoid recursion
         END CATCH
     END CATCH
 END;
 GO
-PRINT N'Creating Procedure [forge].[sp_upsert_batch_type]...';
+PRINT N'Creating Procedure [forge].[sp_upsert_fulfillment_method]...';
 
 
 GO
 /***************************************************************************************
-  Procedure: sp_upsert_batch_type
-  PK: batch_type_id (INT)
+  Procedure: sp_upsert_fulfillment_method
+  PK: fulfillment_method_id (INT)
 ***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_batch_type
+CREATE PROCEDURE forge.sp_upsert_fulfillment_method
 (
     @p_record_id INT = NULL,
     @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
     -- Table-specific columns
-    @p_type_code VARCHAR(50),
+    @p_method_name VARCHAR(50),
     @p_description VARCHAR(255),
 
     -- Outputs
@@ -3062,7 +3868,7 @@ BEGIN
     DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.batch_type WHERE batch_type_id = @p_record_id)
+       AND EXISTS(SELECT 1 FROM forge.fulfillment_method WHERE fulfillment_method_id = @p_record_id)
     BEGIN
         SET @l_exists = 1;
     END
@@ -3074,16 +3880,16 @@ BEGIN
             -- Capture data before deletion
             SELECT @l_data_before = (
                 SELECT 
-                    batch_type_id,
-                    batch_type_name,
+                    fulfillment_method_id,
+                    method_name,
                     description
-                FROM forge.batch_type 
-                WHERE batch_type_id = @p_record_id
+                FROM forge.fulfillment_method 
+                WHERE fulfillment_method_id = @p_record_id
                 FOR JSON PATH
             );
             
-            DELETE FROM forge.batch_type
-            WHERE batch_type_id = @p_record_id;
+            DELETE FROM forge.fulfillment_method
+            WHERE fulfillment_method_id = @p_record_id;
 
             SET @l_action_type_id = 3;
 
@@ -3093,14 +3899,14 @@ BEGIN
                     @p_logging_id = @l_log_id,
                     @p_source_system = 'FORGE',
                     @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'batch_type',
+                    @p_object_name = 'fulfillment_method',
                     @p_object_id = @p_record_id,
                     @p_action_type_id = @l_action_type_id,
                     @p_status_code_id = 1,
                     @p_data_before = @l_data_before,
                     @p_data_after = NULL,
                     @p_diff_data = NULL,
-                    @p_message = 'Deleted from batch_type',
+                    @p_message = 'Deleted from fulfillment_method',
                     @p_context_id = NULL,
                     @p_return_result_ok = @p_return_result_ok OUTPUT,
                     @p_return_result_message = @p_return_result_message OUTPUT,
@@ -3112,38 +3918,38 @@ BEGIN
             -- Capture data before update
             SELECT @l_data_before = (
                 SELECT 
-                    batch_type_id,
-                    batch_type_name,
+                    fulfillment_method_id,
+                    method_name,
                     description
-                FROM forge.batch_type 
-                WHERE batch_type_id = @p_record_id
+                FROM forge.fulfillment_method 
+                WHERE fulfillment_method_id = @p_record_id
                 FOR JSON PATH
             );
 
-            UPDATE forge.batch_type
+            UPDATE forge.fulfillment_method
             SET
-                batch_type_name = @p_type_code,
+                method_name = @p_method_name,
                 description = @p_description
-            WHERE batch_type_id = @p_record_id;
+            WHERE fulfillment_method_id = @p_record_id;
 
             -- Capture data after update
             SELECT @l_data_after = (
                 SELECT 
-                    batch_type_id,
-                    batch_type_name,
+                    fulfillment_method_id,
+                    method_name,
                     description
-                FROM forge.batch_type 
-                WHERE batch_type_id = @p_record_id
+                FROM forge.fulfillment_method 
+                WHERE fulfillment_method_id = @p_record_id
                 FOR JSON PATH
             );
 
             -- Generate diff data
             WITH DiffData AS (
                 SELECT 
-                    'batch_type_name' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].batch_type_name') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].batch_type_name') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].batch_type_name') <> JSON_VALUE(@l_data_after, '$[0].batch_type_name')
+                    'method_name' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].method_name') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].method_name') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].method_name') <> JSON_VALUE(@l_data_after, '$[0].method_name')
                 UNION ALL
                 SELECT 
                     'description' as [field],
@@ -3159,14 +3965,14 @@ BEGIN
                 @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch_type',
+                @p_object_name = 'fulfillment_method',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = @l_data_before,
                 @p_data_after = @l_data_after,
                 @p_diff_data = @l_diff_data,
-                @p_message = 'Updated batch_type',
+                @p_message = 'Updated fulfillment_method',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -3175,29 +3981,29 @@ BEGIN
         ELSE
         BEGIN
             IF @p_record_id IS NULL
-                SET @p_record_id = (SELECT ISNULL(MAX(batch_type_id), 0) + 1 FROM forge.batch_type);
+                SET @p_record_id = (SELECT ISNULL(MAX(fulfillment_method_id), 0) + 1 FROM forge.fulfillment_method);
 
-            INSERT INTO forge.batch_type
+            INSERT INTO forge.fulfillment_method
             (
-                batch_type_id,
-                batch_type_name,
+                fulfillment_method_id,
+                method_name,
                 description
             )
             VALUES
             (
                 @p_record_id,
-                @p_type_code,
+                @p_method_name,
                 @p_description
             );
 
             -- Capture data after insert
             SELECT @l_data_after = (
                 SELECT 
-                    batch_type_id,
-                    batch_type_name,
+                    fulfillment_method_id,
+                    method_name,
                     description
-                FROM forge.batch_type 
-                WHERE batch_type_id = @p_record_id
+                FROM forge.fulfillment_method 
+                WHERE fulfillment_method_id = @p_record_id
                 FOR JSON PATH
             );
 
@@ -3207,14 +4013,14 @@ BEGIN
                 @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch_type',
+                @p_object_name = 'fulfillment_method',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = NULL,
                 @p_data_after = @l_data_after,
                 @p_diff_data = NULL,
-                @p_message = 'Inserted into batch_type',
+                @p_message = 'Inserted into fulfillment_method',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -3244,7 +4050,7 @@ BEGIN
                 @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch_type',
+                @p_object_name = 'fulfillment_method',
                 @p_object_id = NULL,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 2,
@@ -3258,296 +4064,6 @@ BEGIN
                 @p_logging_id_out = NULL;
         END TRY
         BEGIN CATCH
-        END CATCH
-    END CATCH
-END;
-GO
-PRINT N'Creating Procedure [forge].[sp_upsert_batch]...';
-
-
-GO
-/***************************************************************************************
-  Procedure: sp_upsert_batch
-  PK: batch_id
-***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_batch
-(
-    @p_record_id UNIQUEIDENTIFIER = NULL,
-    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
-    @p_is_delete BIT = 0,
-
-    -- Table columns
-    @p_batch_name VARCHAR(100),
-    @p_batch_type_id INT,
-    @p_batch_state_id INT,                -- Changed from UNIQUEIDENTIFIER to INT to match batch_state table
-    @p_date_started_utc DATETIME = NULL,
-    @p_date_completed_utc DATETIME = NULL,
-
-    -- Outputs
-    @p_return_result_ok BIT OUTPUT,
-    @p_return_result_message NVARCHAR(MAX) OUTPUT
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Default to NONE user if no user ID is provided
-    IF @p_created_by_user_id IS NULL
-        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
-
-    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
-    DECLARE @l_exists BIT = 0;
-    DECLARE @l_action_type_id INT;
-    DECLARE @l_data_before NVARCHAR(MAX);
-    DECLARE @l_data_after NVARCHAR(MAX);
-    DECLARE @l_diff_data NVARCHAR(MAX);
-
-    IF @p_record_id IS NOT NULL
-       AND EXISTS (SELECT 1 FROM forge.batch WHERE batch_id = @p_record_id)
-    BEGIN
-        SET @l_exists = 1;
-    END
-
-    BEGIN TRY
-        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
-        BEGIN
-            -- Capture data before deletion
-            SELECT @l_data_before = (
-                SELECT 
-                    batch_id,
-                    batch_name,
-                    batch_type_id,
-                    batch_state_id,
-                    date_created_utc,
-                    date_started_utc,
-                    date_completed_utc
-                FROM forge.batch 
-                WHERE batch_id = @p_record_id
-                FOR JSON PATH
-            );
-            
-            DELETE FROM forge.batch
-            WHERE batch_id = @p_record_id;
-
-            SET @l_action_type_id = 3;
-
-            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
-            BEGIN
-                EXEC core.sp_log_transaction
-                    @p_logging_id = @l_log_id,
-                    @p_source_system = 'FORGE',
-                    @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'batch',
-                    @p_object_id = @p_record_id,
-                    @p_action_type_id = @l_action_type_id,
-                    @p_status_code_id = 1,
-                    @p_data_before = @l_data_before,
-                    @p_data_after = NULL,
-                    @p_diff_data = NULL,
-                    @p_message = 'Deleted from batch',
-                    @p_context_id = NULL,
-                    @p_return_result_ok = @p_return_result_ok OUTPUT,
-                    @p_return_result_message = @p_return_result_message OUTPUT,
-                    @p_logging_id_out = @l_log_id OUTPUT;
-            END
-        END
-        ELSE IF @l_exists = 1
-        BEGIN
-            -- Capture data before update
-            SELECT @l_data_before = (
-                SELECT 
-                    batch_id,
-                    batch_name,
-                    batch_type_id,
-                    batch_state_id,
-                    date_created_utc,
-                    date_started_utc,
-                    date_completed_utc
-                FROM forge.batch 
-                WHERE batch_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            UPDATE forge.batch
-            SET
-                batch_name = @p_batch_name,
-                batch_type_id = @p_batch_type_id,
-                batch_state_id = @p_batch_state_id,
-                date_started_utc = @p_date_started_utc,
-                date_completed_utc = @p_date_completed_utc
-            WHERE batch_id = @p_record_id;
-
-            -- Capture data after update
-            SELECT @l_data_after = (
-                SELECT 
-                    batch_id,
-                    batch_name,
-                    batch_type_id,
-                    batch_state_id,
-                    date_created_utc,
-                    date_started_utc,
-                    date_completed_utc
-                FROM forge.batch 
-                WHERE batch_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            -- Generate diff data
-            WITH DiffData AS (
-                SELECT 
-                    'batch_name' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].batch_name') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].batch_name') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].batch_name') <> JSON_VALUE(@l_data_after, '$[0].batch_name')
-                UNION ALL
-                SELECT 
-                    'batch_type_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].batch_type_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].batch_type_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].batch_type_id') <> JSON_VALUE(@l_data_after, '$[0].batch_type_id')
-                UNION ALL
-                SELECT 
-                    'state_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].state_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].state_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].state_id') <> JSON_VALUE(@l_data_after, '$[0].state_id')
-                UNION ALL
-                SELECT 
-                    'date_started_utc' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].date_started_utc') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].date_started_utc') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].date_started_utc') <> JSON_VALUE(@l_data_after, '$[0].date_started_utc')
-                UNION ALL
-                SELECT 
-                    'date_completed_utc' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].date_completed_utc') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].date_completed_utc') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].date_completed_utc') <> JSON_VALUE(@l_data_after, '$[0].date_completed_utc')
-            )
-            SELECT @l_diff_data = (SELECT * FROM DiffData FOR JSON PATH);
-
-            SET @l_action_type_id = 2;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = @l_data_after,
-                @p_diff_data = @l_diff_data,
-                @p_message = 'Updated batch',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-        ELSE
-        BEGIN
-            IF @p_record_id IS NULL
-                SET @p_record_id = NEWID();
-
-            INSERT INTO forge.batch
-            (
-                batch_id,
-                batch_name,
-                batch_type_id,
-                batch_state_id,
-                date_started_utc,
-                date_completed_utc
-            )
-            VALUES
-            (
-                @p_record_id,
-                @p_batch_name,
-                @p_batch_type_id,
-                @p_batch_state_id,
-                @p_date_started_utc,
-                @p_date_completed_utc
-            );
-
-            -- Capture data after insert
-            SELECT @l_data_after = (
-                SELECT 
-                    batch_id,
-                    batch_name,
-                    batch_type_id,
-                    batch_state_id,
-                    date_created_utc,
-                    date_started_utc,
-                    date_completed_utc
-                FROM forge.batch 
-                WHERE batch_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            SET @l_action_type_id = 1;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = @l_data_after,
-                @p_diff_data = NULL,
-                @p_message = 'Inserted into batch',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-
-    END TRY
-    BEGIN CATCH
-        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
-        DECLARE @l_err_number INT = ERROR_NUMBER();
-        DECLARE @l_err_line INT = ERROR_LINE();
-        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
-        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
-
-        SET @p_return_result_ok = 0;
-        SET @p_return_result_message = CONCAT(
-            'Error: ', @l_err_message,
-            ' (Line ', @l_err_line,
-            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
-            ', Error: ', @l_err_number, ')'
-        );
-
-        -- Decide action type based on what we were attempting
-        SET @l_action_type_id = CASE
-            WHEN @p_is_delete = 1 THEN 3   -- was trying to delete
-            WHEN @l_exists = 1 THEN 2      -- was trying to update
-            ELSE 1                         -- was trying to insert
-        END;
-
-        -- Attempt to log the fail
-        BEGIN TRY
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_transaction_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'batch',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,  -- FAILED
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = @p_return_result_message,
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = NULL;
-        END TRY
-        BEGIN CATCH
-            -- Suppress nested logging failure to avoid recursion
         END CATCH
     END CATCH
 END;
@@ -4002,25 +4518,26 @@ BEGIN
     END CATCH
 END;
 GO
-PRINT N'Creating Procedure [forge].[sp_upsert_fulfillment_assignment]...';
+PRINT N'Creating Procedure [forge].[sp_upsert_batch]...';
 
 
 GO
 /***************************************************************************************
-  Procedure: sp_upsert_fulfillment_assignment
-  PK: assignment_id
+  Procedure: sp_upsert_batch
+  PK: batch_id
 ***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_fulfillment_assignment
+CREATE PROCEDURE forge.sp_upsert_batch
 (
     @p_record_id UNIQUEIDENTIFIER = NULL,
     @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
-    -- Table-specific columns
-    @p_transfer_order_id UNIQUEIDENTIFIER,
-    @p_order_line_id UNIQUEIDENTIFIER,
-    @p_fulfillment_method_id INT,
-    @p_precedence_order INT,
+    -- Table columns
+    @p_batch_name VARCHAR(100),
+    @p_batch_type_id INT,
+    @p_batch_state_id INT,                -- Changed from UNIQUEIDENTIFIER to INT to match batch_state table
+    @p_date_started_utc DATETIME = NULL,
+    @p_date_completed_utc DATETIME = NULL,
 
     -- Outputs
     @p_return_result_ok BIT OUTPUT,
@@ -4042,47 +4559,48 @@ BEGIN
     DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.fulfillment_assignment WHERE fulfillment_assignment_id = @p_record_id)
+       AND EXISTS (SELECT 1 FROM forge.batch WHERE batch_id = @p_record_id)
     BEGIN
         SET @l_exists = 1;
     END
 
     BEGIN TRY
-
         IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
         BEGIN
             -- Capture data before deletion
             SELECT @l_data_before = (
                 SELECT 
-                    fulfillment_assignment_id,
-                    transfer_order_id,
-                    order_line_id,
-                    fulfillment_method_id,
-                    precedence_order
-                FROM forge.fulfillment_assignment 
-                WHERE fulfillment_assignment_id = @p_record_id
+                    batch_id,
+                    batch_name,
+                    batch_type_id,
+                    batch_state_id,
+                    date_created_utc,
+                    date_started_utc,
+                    date_completed_utc
+                FROM forge.batch 
+                WHERE batch_id = @p_record_id
                 FOR JSON PATH
             );
             
-            DELETE FROM forge.fulfillment_assignment
-            WHERE fulfillment_assignment_id = @p_record_id;
+            DELETE FROM forge.batch
+            WHERE batch_id = @p_record_id;
 
             SET @l_action_type_id = 3;
 
             IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
             BEGIN
                 EXEC core.sp_log_transaction
-                    @p_transaction_log_id = @l_log_id,
+                    @p_logging_id = @l_log_id,
                     @p_source_system = 'FORGE',
                     @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'fulfillment_assignment',
+                    @p_object_name = 'batch',
                     @p_object_id = @p_record_id,
                     @p_action_type_id = @l_action_type_id,
                     @p_status_code_id = 1,
                     @p_data_before = @l_data_before,
                     @p_data_after = NULL,
                     @p_diff_data = NULL,
-                    @p_message = 'Deleted from fulfillment_assignment',
+                    @p_message = 'Deleted from batch',
                     @p_context_id = NULL,
                     @p_return_result_ok = @p_return_result_ok OUTPUT,
                     @p_return_result_message = @p_return_result_message OUTPUT,
@@ -4094,79 +4612,90 @@ BEGIN
             -- Capture data before update
             SELECT @l_data_before = (
                 SELECT 
-                    fulfillment_assignment_id,
-                    transfer_order_id,
-                    order_line_id,
-                    fulfillment_method_id,
-                    precedence_order
-                FROM forge.fulfillment_assignment 
-                WHERE fulfillment_assignment_id = @p_record_id
+                    batch_id,
+                    batch_name,
+                    batch_type_id,
+                    batch_state_id,
+                    date_created_utc,
+                    date_started_utc,
+                    date_completed_utc
+                FROM forge.batch 
+                WHERE batch_id = @p_record_id
                 FOR JSON PATH
             );
 
-            UPDATE forge.fulfillment_assignment
+            UPDATE forge.batch
             SET
-                transfer_order_id = @p_transfer_order_id,
-                order_line_id = @p_order_line_id,
-                fulfillment_method_id = @p_fulfillment_method_id,
-                precedence_order = @p_precedence_order
-            WHERE fulfillment_assignment_id = @p_record_id;
+                batch_name = @p_batch_name,
+                batch_type_id = @p_batch_type_id,
+                batch_state_id = @p_batch_state_id,
+                date_started_utc = @p_date_started_utc,
+                date_completed_utc = @p_date_completed_utc
+            WHERE batch_id = @p_record_id;
 
             -- Capture data after update
             SELECT @l_data_after = (
                 SELECT 
-                    fulfillment_assignment_id,
-                    transfer_order_id,
-                    order_line_id,
-                    fulfillment_method_id,
-                    precedence_order
-                FROM forge.fulfillment_assignment 
-                WHERE fulfillment_assignment_id = @p_record_id
+                    batch_id,
+                    batch_name,
+                    batch_type_id,
+                    batch_state_id,
+                    date_created_utc,
+                    date_started_utc,
+                    date_completed_utc
+                FROM forge.batch 
+                WHERE batch_id = @p_record_id
                 FOR JSON PATH
             );
 
             -- Generate diff data
             WITH DiffData AS (
                 SELECT 
-                    'transfer_order_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].transfer_order_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].transfer_order_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].transfer_order_id') <> JSON_VALUE(@l_data_after, '$[0].transfer_order_id')
+                    'batch_name' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].batch_name') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].batch_name') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].batch_name') <> JSON_VALUE(@l_data_after, '$[0].batch_name')
                 UNION ALL
                 SELECT 
-                    'order_line_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].order_line_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].order_line_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].order_line_id') <> JSON_VALUE(@l_data_after, '$[0].order_line_id')
+                    'batch_type_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].batch_type_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].batch_type_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].batch_type_id') <> JSON_VALUE(@l_data_after, '$[0].batch_type_id')
                 UNION ALL
                 SELECT 
-                    'fulfillment_method_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].fulfillment_method_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].fulfillment_method_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].fulfillment_method_id') <> JSON_VALUE(@l_data_after, '$[0].fulfillment_method_id')
+                    'state_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].state_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].state_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].state_id') <> JSON_VALUE(@l_data_after, '$[0].state_id')
                 UNION ALL
                 SELECT 
-                    'precedence_order' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].precedence_order') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].precedence_order') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].precedence_order') <> JSON_VALUE(@l_data_after, '$[0].precedence_order')
+                    'date_started_utc' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].date_started_utc') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].date_started_utc') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].date_started_utc') <> JSON_VALUE(@l_data_after, '$[0].date_started_utc')
+                UNION ALL
+                SELECT 
+                    'date_completed_utc' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].date_completed_utc') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].date_completed_utc') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].date_completed_utc') <> JSON_VALUE(@l_data_after, '$[0].date_completed_utc')
             )
-            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
+            SELECT @l_diff_data = (SELECT * FROM DiffData FOR JSON PATH);
 
             SET @l_action_type_id = 2;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'fulfillment_assignment',
+                @p_object_name = 'batch',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = @l_data_before,
                 @p_data_after = @l_data_after,
                 @p_diff_data = @l_diff_data,
-                @p_message = 'Updated fulfillment_assignment',
+                @p_message = 'Updated batch',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -4177,50 +4706,54 @@ BEGIN
             IF @p_record_id IS NULL
                 SET @p_record_id = NEWID();
 
-            INSERT INTO forge.fulfillment_assignment
+            INSERT INTO forge.batch
             (
-                fulfillment_assignment_id,
-                transfer_order_id,
-                order_line_id,
-                fulfillment_method_id,
-                precedence_order
+                batch_id,
+                batch_name,
+                batch_type_id,
+                batch_state_id,
+                date_started_utc,
+                date_completed_utc
             )
             VALUES
             (
                 @p_record_id,
-                @p_transfer_order_id,
-                @p_order_line_id,
-                @p_fulfillment_method_id,
-                @p_precedence_order
+                @p_batch_name,
+                @p_batch_type_id,
+                @p_batch_state_id,
+                @p_date_started_utc,
+                @p_date_completed_utc
             );
 
             -- Capture data after insert
             SELECT @l_data_after = (
                 SELECT 
-                    fulfillment_assignment_id,
-                    transfer_order_id,
-                    order_line_id,
-                    fulfillment_method_id,
-                    precedence_order
-                FROM forge.fulfillment_assignment 
-                WHERE fulfillment_assignment_id = @p_record_id
+                    batch_id,
+                    batch_name,
+                    batch_type_id,
+                    batch_state_id,
+                    date_created_utc,
+                    date_started_utc,
+                    date_completed_utc
+                FROM forge.batch 
+                WHERE batch_id = @p_record_id
                 FOR JSON PATH
             );
 
             SET @l_action_type_id = 1;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'fulfillment_assignment',
+                @p_object_name = 'batch',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = NULL,
                 @p_data_after = @l_data_after,
                 @p_diff_data = NULL,
-                @p_message = 'Inserted into fulfillment_assignment',
+                @p_message = 'Inserted into batch',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -4243,21 +4776,23 @@ BEGIN
             ', Error: ', @l_err_number, ')'
         );
 
+        -- Decide action type based on what we were attempting
         SET @l_action_type_id = CASE
-            WHEN @p_is_delete = 1 THEN 3
-            WHEN @l_exists = 1 THEN 2
-            ELSE 1
+            WHEN @p_is_delete = 1 THEN 3   -- was trying to delete
+            WHEN @l_exists = 1 THEN 2      -- was trying to update
+            ELSE 1                         -- was trying to insert
         END;
 
+        -- Attempt to log the fail
         BEGIN TRY
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_transaction_log_id,
+                @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'fulfillment_assignment',
+                @p_object_name = 'batch',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,
+                @p_status_code_id = 2,  -- FAILED
                 @p_data_before = NULL,
                 @p_data_after = NULL,
                 @p_diff_data = NULL,
@@ -4268,26 +4803,27 @@ BEGIN
                 @p_logging_id_out = NULL;
         END TRY
         BEGIN CATCH
+            -- Suppress nested logging failure to avoid recursion
         END CATCH
     END CATCH
 END;
 GO
-PRINT N'Creating Procedure [forge].[sp_upsert_fulfillment_method]...';
+PRINT N'Creating Procedure [forge].[sp_upsert_batch_type]...';
 
 
 GO
 /***************************************************************************************
-  Procedure: sp_upsert_fulfillment_method
-  PK: fulfillment_method_id (INT)
+  Procedure: sp_upsert_batch_type
+  PK: batch_type_id (INT)
 ***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_fulfillment_method
+CREATE PROCEDURE forge.sp_upsert_batch_type
 (
     @p_record_id INT = NULL,
     @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
     -- Table-specific columns
-    @p_method_name VARCHAR(50),
+    @p_type_code VARCHAR(50),
     @p_description VARCHAR(255),
 
     -- Outputs
@@ -4310,7 +4846,7 @@ BEGIN
     DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.fulfillment_method WHERE fulfillment_method_id = @p_record_id)
+       AND EXISTS(SELECT 1 FROM forge.batch_type WHERE batch_type_id = @p_record_id)
     BEGIN
         SET @l_exists = 1;
     END
@@ -4322,33 +4858,33 @@ BEGIN
             -- Capture data before deletion
             SELECT @l_data_before = (
                 SELECT 
-                    fulfillment_method_id,
-                    method_name,
+                    batch_type_id,
+                    batch_type_name,
                     description
-                FROM forge.fulfillment_method 
-                WHERE fulfillment_method_id = @p_record_id
+                FROM forge.batch_type 
+                WHERE batch_type_id = @p_record_id
                 FOR JSON PATH
             );
             
-            DELETE FROM forge.fulfillment_method
-            WHERE fulfillment_method_id = @p_record_id;
+            DELETE FROM forge.batch_type
+            WHERE batch_type_id = @p_record_id;
 
             SET @l_action_type_id = 3;
 
             IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
             BEGIN
                 EXEC core.sp_log_transaction
-                    @p_transaction_log_id = @l_log_id,
+                    @p_logging_id = @l_log_id,
                     @p_source_system = 'FORGE',
                     @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'fulfillment_method',
+                    @p_object_name = 'batch_type',
                     @p_object_id = @p_record_id,
                     @p_action_type_id = @l_action_type_id,
                     @p_status_code_id = 1,
                     @p_data_before = @l_data_before,
                     @p_data_after = NULL,
                     @p_diff_data = NULL,
-                    @p_message = 'Deleted from fulfillment_method',
+                    @p_message = 'Deleted from batch_type',
                     @p_context_id = NULL,
                     @p_return_result_ok = @p_return_result_ok OUTPUT,
                     @p_return_result_message = @p_return_result_message OUTPUT,
@@ -4360,38 +4896,38 @@ BEGIN
             -- Capture data before update
             SELECT @l_data_before = (
                 SELECT 
-                    fulfillment_method_id,
-                    method_name,
+                    batch_type_id,
+                    batch_type_name,
                     description
-                FROM forge.fulfillment_method 
-                WHERE fulfillment_method_id = @p_record_id
+                FROM forge.batch_type 
+                WHERE batch_type_id = @p_record_id
                 FOR JSON PATH
             );
 
-            UPDATE forge.fulfillment_method
+            UPDATE forge.batch_type
             SET
-                method_name = @p_method_name,
+                batch_type_name = @p_type_code,
                 description = @p_description
-            WHERE fulfillment_method_id = @p_record_id;
+            WHERE batch_type_id = @p_record_id;
 
             -- Capture data after update
             SELECT @l_data_after = (
                 SELECT 
-                    fulfillment_method_id,
-                    method_name,
+                    batch_type_id,
+                    batch_type_name,
                     description
-                FROM forge.fulfillment_method 
-                WHERE fulfillment_method_id = @p_record_id
+                FROM forge.batch_type 
+                WHERE batch_type_id = @p_record_id
                 FOR JSON PATH
             );
 
             -- Generate diff data
             WITH DiffData AS (
                 SELECT 
-                    'method_name' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].method_name') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].method_name') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].method_name') <> JSON_VALUE(@l_data_after, '$[0].method_name')
+                    'batch_type_name' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].batch_type_name') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].batch_type_name') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].batch_type_name') <> JSON_VALUE(@l_data_after, '$[0].batch_type_name')
                 UNION ALL
                 SELECT 
                     'description' as [field],
@@ -4404,17 +4940,17 @@ BEGIN
             SET @l_action_type_id = 2;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'fulfillment_method',
+                @p_object_name = 'batch_type',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = @l_data_before,
                 @p_data_after = @l_data_after,
                 @p_diff_data = @l_diff_data,
-                @p_message = 'Updated fulfillment_method',
+                @p_message = 'Updated batch_type',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -4423,46 +4959,46 @@ BEGIN
         ELSE
         BEGIN
             IF @p_record_id IS NULL
-                SET @p_record_id = (SELECT ISNULL(MAX(fulfillment_method_id), 0) + 1 FROM forge.fulfillment_method);
+                SET @p_record_id = (SELECT ISNULL(MAX(batch_type_id), 0) + 1 FROM forge.batch_type);
 
-            INSERT INTO forge.fulfillment_method
+            INSERT INTO forge.batch_type
             (
-                fulfillment_method_id,
-                method_name,
+                batch_type_id,
+                batch_type_name,
                 description
             )
             VALUES
             (
                 @p_record_id,
-                @p_method_name,
+                @p_type_code,
                 @p_description
             );
 
             -- Capture data after insert
             SELECT @l_data_after = (
                 SELECT 
-                    fulfillment_method_id,
-                    method_name,
+                    batch_type_id,
+                    batch_type_name,
                     description
-                FROM forge.fulfillment_method 
-                WHERE fulfillment_method_id = @p_record_id
+                FROM forge.batch_type 
+                WHERE batch_type_id = @p_record_id
                 FOR JSON PATH
             );
 
             SET @l_action_type_id = 1;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'fulfillment_method',
+                @p_object_name = 'batch_type',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = NULL,
                 @p_data_after = @l_data_after,
                 @p_diff_data = NULL,
-                @p_message = 'Inserted into fulfillment_method',
+                @p_message = 'Inserted into batch_type',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -4489,10 +5025,10 @@ BEGIN
 
         BEGIN TRY
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_transaction_log_id,
+                @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'fulfillment_method',
+                @p_object_name = 'batch_type',
                 @p_object_id = NULL,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 2,
@@ -4510,31 +5046,23 @@ BEGIN
     END CATCH
 END;
 GO
-PRINT N'Creating Procedure [forge].[sp_upsert_inventory_count]...';
+PRINT N'Creating Procedure [forge].[sp_upsert_batch_state]...';
 
 
 GO
 /***************************************************************************************
-  Procedure: sp_upsert_inventory_count
-  PK: inventory_count_id
+  Procedure: sp_upsert_batch_state
+  PK: batch_state_id (INT)
 ***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_inventory_count
+CREATE PROCEDURE forge.sp_upsert_batch_state
 (
-    @p_record_id UNIQUEIDENTIFIER = NULL,
+    @p_record_id INT = NULL,
     @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
-    -- Table-specific columns
-    @p_inventory_document_id UNIQUEIDENTIFIER,
-    @p_storage_location_id UNIQUEIDENTIFIER,
-    @p_item_uom_id UNIQUEIDENTIFIER,
-    @p_expected_quantity INT,
-    @p_counted_quantity INT,
-    @p_count_status VARCHAR(50),
-    @p_counted_by_user_id UNIQUEIDENTIFIER = NULL,
-    @p_validated_by_user_id UNIQUEIDENTIFIER = NULL,
-    @p_date_counted_utc DATETIME = NULL,
-    @p_date_validated_utc DATETIME = NULL,
+    -- Table columns
+    @p_batch_state_name VARCHAR(50),
+    @p_description VARCHAR(255) = NULL,
 
     -- Outputs
     @p_return_result_ok BIT OUTPUT,
@@ -4556,38 +5084,27 @@ BEGIN
     DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.inventory_count WHERE inventory_count_id = @p_record_id)
+       AND EXISTS (SELECT 1 FROM forge.batch_state WHERE batch_state_id = @p_record_id)
     BEGIN
         SET @l_exists = 1;
     END
 
     BEGIN TRY
-
         IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
         BEGIN
             -- Capture data before deletion
             SELECT @l_data_before = (
                 SELECT 
-                    inventory_count_id,
-                    inventory_document_id,
-                    storage_location_id,
-                    item_uom_id,
-                    expected_quantity,
-                    counted_quantity,
-                    count_status,
-                    counted_by_user_id,
-                    validated_by_user_id,
-                    date_counted_utc,
-                    date_validated_utc,
-                    date_created_utc,
-                    date_updated_utc
-                FROM forge.inventory_count 
-                WHERE inventory_count_id = @p_record_id
+                    batch_state_id,
+                    batch_state_name,
+                    description
+                FROM forge.batch_state 
+                WHERE batch_state_id = @p_record_id
                 FOR JSON PATH
             );
             
-            DELETE FROM forge.inventory_count
-            WHERE inventory_count_id = @p_record_id;
+            DELETE FROM forge.batch_state
+            WHERE batch_state_id = @p_record_id;
 
             SET @l_action_type_id = 3;
 
@@ -4597,14 +5114,14 @@ BEGIN
                     @p_logging_id = @l_log_id,
                     @p_source_system = 'FORGE',
                     @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'inventory_count',
+                    @p_object_name = 'batch_state',
                     @p_object_id = @p_record_id,
                     @p_action_type_id = @l_action_type_id,
                     @p_status_code_id = 1,
                     @p_data_before = @l_data_before,
                     @p_data_after = NULL,
                     @p_diff_data = NULL,
-                    @p_message = 'Deleted from inventory_count',
+                    @p_message = 'Deleted from batch_state',
                     @p_context_id = NULL,
                     @p_return_result_ok = @p_return_result_ok OUTPUT,
                     @p_return_result_message = @p_return_result_message OUTPUT,
@@ -4616,121 +5133,329 @@ BEGIN
             -- Capture data before update
             SELECT @l_data_before = (
                 SELECT 
-                    inventory_count_id,
-                    inventory_document_id,
-                    storage_location_id,
-                    item_uom_id,
-                    expected_quantity,
-                    counted_quantity,
-                    count_status,
-                    counted_by_user_id,
-                    validated_by_user_id,
-                    date_counted_utc,
-                    date_validated_utc,
-                    date_created_utc,
-                    date_updated_utc
-                FROM forge.inventory_count 
-                WHERE inventory_count_id = @p_record_id
+                    batch_state_id,
+                    batch_state_name,
+                    description
+                FROM forge.batch_state 
+                WHERE batch_state_id = @p_record_id
                 FOR JSON PATH
             );
 
-            UPDATE forge.inventory_count
+            UPDATE forge.batch_state
             SET
-                inventory_document_id = @p_inventory_document_id,
-                storage_location_id = @p_storage_location_id,
-                item_uom_id = @p_item_uom_id,
-                expected_quantity = @p_expected_quantity,
-                counted_quantity = @p_counted_quantity,
-                count_status = @p_count_status,
-                counted_by_user_id = @p_counted_by_user_id,
-                validated_by_user_id = @p_validated_by_user_id,
-                date_counted_utc = @p_date_counted_utc,
-                date_validated_utc = @p_date_validated_utc,
-                date_updated_utc = GETUTCDATE()
-            WHERE inventory_count_id = @p_record_id;
+                batch_state_name = @p_batch_state_name,
+                description = @p_description
+            WHERE batch_state_id = @p_record_id;
 
             -- Capture data after update
             SELECT @l_data_after = (
                 SELECT 
-                    inventory_count_id,
-                    inventory_document_id,
-                    storage_location_id,
-                    item_uom_id,
-                    expected_quantity,
-                    counted_quantity,
-                    count_status,
-                    counted_by_user_id,
-                    validated_by_user_id,
-                    date_counted_utc,
-                    date_validated_utc,
-                    date_created_utc,
-                    date_updated_utc
-                FROM forge.inventory_count 
-                WHERE inventory_count_id = @p_record_id
+                    batch_state_id,
+                    batch_state_name,
+                    description
+                FROM forge.batch_state 
+                WHERE batch_state_id = @p_record_id
                 FOR JSON PATH
             );
 
             -- Generate diff data
             WITH DiffData AS (
                 SELECT 
-                    'inventory_document_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].inventory_document_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].inventory_document_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].inventory_document_id') <> JSON_VALUE(@l_data_after, '$[0].inventory_document_id')
+                    'batch_state_name' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].batch_state_name') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].batch_state_name') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].batch_state_name') <> JSON_VALUE(@l_data_after, '$[0].batch_state_name')
                 UNION ALL
                 SELECT 
-                    'storage_location_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].storage_location_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].storage_location_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].storage_location_id') <> JSON_VALUE(@l_data_after, '$[0].storage_location_id')
+                    'description' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].description') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].description') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].description') <> JSON_VALUE(@l_data_after, '$[0].description')
+            )
+            SELECT @l_diff_data = (SELECT * FROM DiffData FOR JSON PATH);
+
+            SET @l_action_type_id = 2;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'batch_state',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated batch_state',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE
+        BEGIN
+            IF @p_record_id IS NULL
+            BEGIN
+                -- Get the next available ID
+                SELECT @p_record_id = ISNULL(MAX(batch_state_id), 0) + 1
+                FROM forge.batch_state;
+            END
+
+            INSERT INTO forge.batch_state
+            (
+                batch_state_id,
+                batch_state_name,
+                description
+            )
+            VALUES
+            (
+                @p_record_id,
+                @p_batch_state_name,
+                @p_description
+            );
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    batch_state_id,
+                    batch_state_name,
+                    description
+                FROM forge.batch_state 
+                WHERE batch_state_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            SET @l_action_type_id = 1;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'batch_state',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = NULL,
+                @p_data_after = @l_data_after,
+                @p_diff_data = NULL,
+                @p_message = 'Inserted into batch_state',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+
+    END TRY
+    BEGIN CATCH
+        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
+        DECLARE @l_err_number INT = ERROR_NUMBER();
+        DECLARE @l_err_line INT = ERROR_LINE();
+        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
+        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
+
+        SET @p_return_result_ok = 0;
+        SET @p_return_result_message = CONCAT(
+            'Error: ', @l_err_message,
+            ' (Line ', @l_err_line,
+            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
+            ', Error: ', @l_err_number, ')'
+        );
+
+        -- Decide action type based on what we were attempting
+        SET @l_action_type_id = CASE
+            WHEN @p_is_delete = 1 THEN 3   -- was trying to delete
+            WHEN @l_exists = 1 THEN 2      -- was trying to update
+            ELSE 1                         -- was trying to insert
+        END;
+
+        -- Attempt to log the fail
+        BEGIN TRY
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_transaction_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'batch_state',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 2,  -- FAILED
+                @p_data_before = NULL,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
+                @p_message = @p_return_result_message,
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = NULL;
+        END TRY
+        BEGIN CATCH
+            -- Suppress nested logging failure to avoid recursion
+        END CATCH
+    END CATCH
+END;
+GO
+PRINT N'Creating Procedure [forge].[sp_upsert_item_uom]...';
+
+
+GO
+/***************************************************************************************
+  Procedure: sp_upsert_item_uom
+  PK: item_uom_id
+***************************************************************************************/
+CREATE PROCEDURE forge.sp_upsert_item_uom
+(
+    @p_record_id UNIQUEIDENTIFIER = NULL,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_is_delete BIT = 0,
+
+    -- Table-specific columns
+    @p_item_id UNIQUEIDENTIFIER,
+    @p_uom_code VARCHAR(20),
+    @p_item_code VARCHAR(100),
+    @p_conversion_factor DECIMAL(10,2),
+    @p_required_location_type_id INT,
+    @p_description VARCHAR(255),
+    @p_default_weight DECIMAL(10,2),
+    @p_default_height DECIMAL(10,2),
+    @p_default_width DECIMAL(10,2),
+    @p_default_length DECIMAL(10,2),
+    @p_is_primary BIT,
+
+    -- Outputs
+    @p_return_result_ok BIT OUTPUT,
+    @p_return_result_message NVARCHAR(MAX) OUTPUT
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
+
+    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
+    DECLARE @l_exists BIT = 0;
+    DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
+
+    IF @p_record_id IS NOT NULL
+       AND EXISTS(SELECT 1 FROM forge.item_uom WHERE item_uom_id = @p_record_id)
+    BEGIN
+        SET @l_exists = 1;
+    END
+
+    BEGIN TRY
+
+        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
+        BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    item_uom_id,
+                    item_id,
+                    uom_code,
+                    conversion_factor,
+                    is_primary
+                FROM forge.item_uom 
+                WHERE item_uom_id = @p_record_id
+                FOR JSON PATH
+            );
+            
+            DELETE FROM forge.item_uom
+            WHERE item_uom_id = @p_record_id;
+
+            SET @l_action_type_id = 3;
+
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'item_uom',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from item_uom',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
+        END
+        ELSE IF @l_exists = 1
+        BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    item_uom_id,
+                    item_id,
+                    uom_code,
+                    conversion_factor,
+                    is_primary
+                FROM forge.item_uom 
+                WHERE item_uom_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            UPDATE forge.item_uom
+            SET
+                item_id = @p_item_id,
+                uom_code = @p_uom_code,
+                item_code = @p_item_code,
+                conversion_factor = @p_conversion_factor,
+                required_location_type_id = @p_required_location_type_id,
+                description = @p_description,
+                default_weight = @p_default_weight,
+                default_height = @p_default_height,
+                default_width = @p_default_width,
+                default_length = @p_default_length,
+                is_primary = @p_is_primary
+            WHERE item_uom_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    item_uom_id,
+                    item_id,
+                    uom_code,
+                    conversion_factor,
+                    is_primary
+                FROM forge.item_uom 
+                WHERE item_uom_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+            WITH DiffData AS (
+                SELECT 
+                    'item_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].item_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].item_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].item_id') <> JSON_VALUE(@l_data_after, '$[0].item_id')
                 UNION ALL
                 SELECT 
-                    'item_uom_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].item_uom_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].item_uom_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].item_uom_id') <> JSON_VALUE(@l_data_after, '$[0].item_uom_id')
+                    'uom_code' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].uom_code') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].uom_code') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].uom_code') <> JSON_VALUE(@l_data_after, '$[0].uom_code')
                 UNION ALL
                 SELECT 
-                    'expected_quantity' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].expected_quantity') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].expected_quantity') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].expected_quantity') <> JSON_VALUE(@l_data_after, '$[0].expected_quantity')
+                    'conversion_factor' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].conversion_factor') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].conversion_factor') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].conversion_factor') <> JSON_VALUE(@l_data_after, '$[0].conversion_factor')
                 UNION ALL
                 SELECT 
-                    'counted_quantity' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].counted_quantity') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].counted_quantity') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].counted_quantity') <> JSON_VALUE(@l_data_after, '$[0].counted_quantity')
-                UNION ALL
-                SELECT 
-                    'count_status' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].count_status') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].count_status') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].count_status') <> JSON_VALUE(@l_data_after, '$[0].count_status')
-                UNION ALL
-                SELECT 
-                    'counted_by_user_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].counted_by_user_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].counted_by_user_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].counted_by_user_id') <> JSON_VALUE(@l_data_after, '$[0].counted_by_user_id')
-                UNION ALL
-                SELECT 
-                    'validated_by_user_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].validated_by_user_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].validated_by_user_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].validated_by_user_id') <> JSON_VALUE(@l_data_after, '$[0].validated_by_user_id')
-                UNION ALL
-                SELECT 
-                    'date_counted_utc' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].date_counted_utc') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].date_counted_utc') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].date_counted_utc') <> JSON_VALUE(@l_data_after, '$[0].date_counted_utc')
-                UNION ALL
-                SELECT 
-                    'date_validated_utc' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].date_validated_utc') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].date_validated_utc') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].date_validated_utc') <> JSON_VALUE(@l_data_after, '$[0].date_validated_utc')
+                    'is_primary' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].is_primary') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].is_primary') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].is_primary') <> JSON_VALUE(@l_data_after, '$[0].is_primary')
             )
             SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
 
@@ -4740,14 +5465,14 @@ BEGIN
                 @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'inventory_count',
+                @p_object_name = 'item_uom',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = @l_data_before,
                 @p_data_after = @l_data_after,
                 @p_diff_data = @l_diff_data,
-                @p_message = 'Updated inventory_count',
+                @p_message = 'Updated item_uom',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -4758,53 +5483,47 @@ BEGIN
             IF @p_record_id IS NULL
                 SET @p_record_id = NEWID();
 
-            INSERT INTO forge.inventory_count
+            INSERT INTO forge.item_uom
             (
-                inventory_count_id,
-                inventory_document_id,
-                storage_location_id,
                 item_uom_id,
-                expected_quantity,
-                counted_quantity,
-                count_status,
-                counted_by_user_id,
-                validated_by_user_id,
-                date_counted_utc,
-                date_validated_utc
+                item_id,
+                uom_code,
+                item_code,
+                conversion_factor,
+                required_location_type_id,
+                description,
+                default_weight,
+                default_height,
+                default_width,
+                default_length,
+                is_primary
             )
             VALUES
             (
                 @p_record_id,
-                @p_inventory_document_id,
-                @p_storage_location_id,
-                @p_item_uom_id,
-                @p_expected_quantity,
-                @p_counted_quantity,
-                @p_count_status,
-                @p_counted_by_user_id,
-                @p_validated_by_user_id,
-                @p_date_counted_utc,
-                @p_date_validated_utc
+                @p_item_id,
+                @p_uom_code,
+                @p_item_code,
+                @p_conversion_factor,
+                @p_required_location_type_id,
+                @p_description,
+                @p_default_weight,
+                @p_default_height,
+                @p_default_width,
+                @p_default_length,
+                @p_is_primary
             );
 
             -- Capture data after insert
             SELECT @l_data_after = (
                 SELECT 
-                    inventory_count_id,
-                    inventory_document_id,
-                    storage_location_id,
                     item_uom_id,
-                    expected_quantity,
-                    counted_quantity,
-                    count_status,
-                    counted_by_user_id,
-                    validated_by_user_id,
-                    date_counted_utc,
-                    date_validated_utc,
-                    date_created_utc,
-                    date_updated_utc
-                FROM forge.inventory_count 
-                WHERE inventory_count_id = @p_record_id
+                    item_id,
+                    uom_code,
+                    conversion_factor,
+                    is_primary
+                FROM forge.item_uom 
+                WHERE item_uom_id = @p_record_id
                 FOR JSON PATH
             );
 
@@ -4814,14 +5533,14 @@ BEGIN
                 @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'inventory_count',
+                @p_object_name = 'item_uom',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = NULL,
                 @p_data_after = @l_data_after,
                 @p_diff_data = NULL,
-                @p_message = 'Inserted into inventory_count',
+                @p_message = 'Inserted into item_uom',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -4855,7 +5574,1715 @@ BEGIN
                 @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'inventory_count',
+                @p_object_name = 'item_uom',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 2,
+                @p_data_before = NULL,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
+                @p_message = @p_return_result_message,
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = NULL;
+        END TRY
+        BEGIN CATCH
+        END CATCH
+    END CATCH
+END;
+GO
+PRINT N'Creating Procedure [forge].[sp_upsert_item]...';
+
+
+GO
+/***************************************************************************************
+  Procedure: sp_upsert_item
+  PK: item_id
+***************************************************************************************/
+CREATE PROCEDURE forge.sp_upsert_item
+(
+    @p_record_id UNIQUEIDENTIFIER = NULL,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_is_delete BIT = 0,
+
+    -- Table-specific columns
+    @p_item_number VARCHAR(100),
+    @p_description VARCHAR(255),
+    @p_item_status_id INT,
+
+    -- Outputs
+    @p_return_result_ok BIT OUTPUT,
+    @p_return_result_message NVARCHAR(MAX) OUTPUT
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
+
+    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
+    DECLARE @l_exists BIT = 0;
+    DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
+
+    IF @p_record_id IS NOT NULL
+       AND EXISTS(SELECT 1 FROM forge.item WHERE item_id = @p_record_id)
+    BEGIN
+        SET @l_exists = 1;
+    END
+
+    BEGIN TRY
+
+        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
+        BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    item_id,
+                    item_number,
+                    description,
+                    item_status_id
+                FROM forge.item 
+                WHERE item_id = @p_record_id
+                FOR JSON PATH
+            );
+            
+            DELETE FROM forge.item
+            WHERE item_id = @p_record_id;
+
+            SET @l_action_type_id = 3;
+
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'item',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from item',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
+        END
+        ELSE IF @l_exists = 1
+        BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    item_id,
+                    item_number,
+                    description,
+                    item_status_id
+                FROM forge.item 
+                WHERE item_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            UPDATE forge.item
+            SET
+                item_number = @p_item_number,
+                description = @p_description,
+                item_status_id = @p_item_status_id
+            WHERE item_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    item_id,
+                    item_number,
+                    description,
+                    item_status_id
+                FROM forge.item 
+                WHERE item_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+            WITH DiffData AS (
+                SELECT 
+                    'item_number' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].item_number') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].item_number') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].item_number') <> JSON_VALUE(@l_data_after, '$[0].item_number')
+                UNION ALL
+                SELECT 
+                    'description' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].description') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].description') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].description') <> JSON_VALUE(@l_data_after, '$[0].description')
+                UNION ALL
+                SELECT 
+                    'status_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].status_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].status_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].status_id') <> JSON_VALUE(@l_data_after, '$[0].status_id')
+            )
+            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
+
+            SET @l_action_type_id = 2;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'item',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated item',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE
+        BEGIN
+            IF @p_record_id IS NULL
+                SET @p_record_id = NEWID();
+
+            INSERT INTO forge.item
+            (
+                item_id,
+                item_number,
+                description,
+                item_status_id
+            )
+            VALUES
+            (
+                @p_record_id,
+                @p_item_number,
+                @p_description,
+                @p_item_status_id
+            );
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    item_id,
+                    item_number,
+                    description,
+                    item_status_id
+                FROM forge.item 
+                WHERE item_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            SET @l_action_type_id = 1;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'item',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = NULL,
+                @p_data_after = @l_data_after,
+                @p_diff_data = NULL,
+                @p_message = 'Inserted into item',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+
+    END TRY
+    BEGIN CATCH
+        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
+        DECLARE @l_err_number INT = ERROR_NUMBER();
+        DECLARE @l_err_line INT = ERROR_LINE();
+        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
+        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
+
+        SET @p_return_result_ok = 0;
+        SET @p_return_result_message = CONCAT(
+            'Error: ', @l_err_message,
+            ' (Line ', @l_err_line,
+            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
+            ', Error: ', @l_err_number, ')'
+        );
+
+        SET @l_action_type_id = CASE
+            WHEN @p_is_delete = 1 THEN 3
+            WHEN @l_exists = 1 THEN 2
+            ELSE 1
+        END;
+
+        BEGIN TRY
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_transaction_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'item',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 2,
+                @p_data_before = NULL,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
+                @p_message = @p_return_result_message,
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = NULL;
+        END TRY
+        BEGIN CATCH
+        END CATCH
+    END CATCH
+END;
+GO
+PRINT N'Creating Procedure [forge].[sp_upsert_sub_order_line_task]...';
+
+
+GO
+/***************************************************************************************
+  Procedure: sp_upsert_sub_order_line_task
+  PK: task_id
+***************************************************************************************/
+CREATE PROCEDURE forge.sp_upsert_sub_order_line_task
+(
+    @p_record_id UNIQUEIDENTIFIER = NULL,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_is_delete BIT = 0,
+
+    -- Table-specific columns
+    @p_order_line_id UNIQUEIDENTIFIER,
+    @p_movement_type_id INT,
+    @p_item_uom_id UNIQUEIDENTIFIER,
+    @p_quantity DECIMAL(10,2),
+    @p_actual_quantity DECIMAL(10,2),
+    @p_source_location_id UNIQUEIDENTIFIER,
+    @p_destination_location_id UNIQUEIDENTIFIER,
+    @p_task_state_id INT,
+    @p_assigned_to_user_id UNIQUEIDENTIFIER = NULL,
+    @p_priority INT = NULL,
+    @p_validation_type_id INT = NULL,
+    @p_date_assigned_utc DATETIME = NULL,
+    @p_date_started_utc DATETIME = NULL,
+    @p_date_completed_utc DATETIME = NULL,
+    @p_notes VARCHAR(500) = NULL,
+
+    -- Outputs
+    @p_return_result_ok BIT OUTPUT,
+    @p_return_result_message NVARCHAR(MAX) OUTPUT
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
+
+    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
+    DECLARE @l_exists BIT = 0;
+    DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
+
+    IF @p_record_id IS NOT NULL
+       AND EXISTS(SELECT 1 FROM forge.sub_order_line_task WHERE task_id = @p_record_id)
+    BEGIN
+        SET @l_exists = 1;
+    END
+
+    BEGIN TRY
+
+        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
+        BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    task_id,
+                    order_line_id,
+                    movement_type_id,
+                    item_uom_id,
+                    quantity,
+                    actual_quantity,
+                    source_location_id,
+                    destination_location_id,
+                    task_state_id,
+                    assigned_to_user_id,
+                    priority,
+                    validation_type_id,
+                    date_created_utc,
+                    date_assigned_utc,
+                    date_started_utc,
+                    date_completed_utc,
+                    notes
+                FROM forge.sub_order_line_task 
+                WHERE task_id = @p_record_id
+                FOR JSON PATH
+            );
+            
+            DELETE FROM forge.sub_order_line_task
+            WHERE task_id = @p_record_id;
+
+            SET @l_action_type_id = 3;
+
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'sub_order_line_task',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from sub_order_line_task',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
+        END
+        ELSE IF @l_exists = 1
+        BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    task_id,
+                    order_line_id,
+                    movement_type_id,
+                    item_uom_id,
+                    quantity,
+                    actual_quantity,
+                    source_location_id,
+                    destination_location_id,
+                    task_state_id,
+                    assigned_to_user_id,
+                    priority,
+                    validation_type_id,
+                    date_created_utc,
+                    date_assigned_utc,
+                    date_started_utc,
+                    date_completed_utc,
+                    notes
+                FROM forge.sub_order_line_task 
+                WHERE task_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            UPDATE forge.sub_order_line_task
+            SET
+                order_line_id = @p_order_line_id,
+                movement_type_id = @p_movement_type_id,
+                item_uom_id = @p_item_uom_id,
+                quantity = @p_quantity,
+                actual_quantity = @p_actual_quantity,
+                source_location_id = @p_source_location_id,
+                destination_location_id = @p_destination_location_id,
+                task_state_id = @p_task_state_id,
+                assigned_to_user_id = @p_assigned_to_user_id,
+                priority = @p_priority,
+                validation_type_id = @p_validation_type_id,
+                date_assigned_utc = @p_date_assigned_utc,
+                date_started_utc = @p_date_started_utc,
+                date_completed_utc = @p_date_completed_utc,
+                notes = @p_notes
+            WHERE task_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    task_id,
+                    order_line_id,
+                    movement_type_id,
+                    item_uom_id,
+                    quantity,
+                    actual_quantity,
+                    source_location_id,
+                    destination_location_id,
+                    task_state_id,
+                    assigned_to_user_id,
+                    priority,
+                    validation_type_id,
+                    date_created_utc,
+                    date_assigned_utc,
+                    date_started_utc,
+                    date_completed_utc,
+                    notes
+                FROM forge.sub_order_line_task 
+                WHERE task_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+                WITH DiffData AS (
+                    SELECT 
+                        'order_line_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].order_line_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].order_line_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].order_line_id') <> JSON_VALUE(@l_data_after, '$[0].order_line_id')
+                    UNION ALL
+                    SELECT 
+                        'movement_type_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].movement_type_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].movement_type_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].movement_type_id') <> JSON_VALUE(@l_data_after, '$[0].movement_type_id')
+                    UNION ALL
+                    SELECT 
+                        'item_uom_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].item_uom_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].item_uom_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].item_uom_id') <> JSON_VALUE(@l_data_after, '$[0].item_uom_id')
+                    UNION ALL
+                    SELECT 
+                        'quantity' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].quantity') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].quantity') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].quantity') <> JSON_VALUE(@l_data_after, '$[0].quantity')
+                    UNION ALL
+                    SELECT 
+                        'actual_quantity' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].actual_quantity') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].actual_quantity') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].actual_quantity') <> JSON_VALUE(@l_data_after, '$[0].actual_quantity')
+                    UNION ALL
+                    SELECT 
+                        'source_location_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].source_location_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].source_location_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].source_location_id') <> JSON_VALUE(@l_data_after, '$[0].source_location_id')
+                    UNION ALL
+                    SELECT 
+                        'destination_location_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].destination_location_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].destination_location_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].destination_location_id') <> JSON_VALUE(@l_data_after, '$[0].destination_location_id')
+                    UNION ALL
+                    SELECT 
+                        'task_state_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].task_state_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].task_state_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].task_state_id') <> JSON_VALUE(@l_data_after, '$[0].task_state_id')
+                    UNION ALL
+                    SELECT 
+                        'assigned_to_user_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].assigned_to_user_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].assigned_to_user_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].assigned_to_user_id') <> JSON_VALUE(@l_data_after, '$[0].assigned_to_user_id')
+                    UNION ALL
+                    SELECT 
+                        'priority' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].priority') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].priority') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].priority') <> JSON_VALUE(@l_data_after, '$[0].priority')
+                    UNION ALL
+                    SELECT 
+                        'validation_type_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].validation_type_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].validation_type_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].validation_type_id') <> JSON_VALUE(@l_data_after, '$[0].validation_type_id')
+                    UNION ALL
+                    SELECT 
+                        'date_assigned_utc' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].date_assigned_utc') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].date_assigned_utc') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].date_assigned_utc') <> JSON_VALUE(@l_data_after, '$[0].date_assigned_utc')
+                    UNION ALL
+                    SELECT 
+                        'date_started_utc' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].date_started_utc') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].date_started_utc') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].date_started_utc') <> JSON_VALUE(@l_data_after, '$[0].date_started_utc')
+                    UNION ALL
+                    SELECT 
+                        'date_completed_utc' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].date_completed_utc') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].date_completed_utc') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].date_completed_utc') <> JSON_VALUE(@l_data_after, '$[0].date_completed_utc')
+                    UNION ALL
+                    SELECT 
+                        'notes' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].notes') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].notes') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].notes') <> JSON_VALUE(@l_data_after, '$[0].notes')
+                )
+               SELECT @l_diff_data = (  SELECT * FROM DiffData FOR JSON PATH);
+
+            SET @l_action_type_id = 2;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'sub_order_line_task',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated sub_order_line_task',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE
+        BEGIN
+            IF @p_record_id IS NULL
+                SET @p_record_id = NEWID();
+
+            INSERT INTO forge.sub_order_line_task
+            (
+                task_id,
+                order_line_id,
+                movement_type_id,
+                item_uom_id,
+                quantity,
+                actual_quantity,
+                source_location_id,
+                destination_location_id,
+                task_state_id,
+                assigned_to_user_id,
+                priority,
+                validation_type_id,
+                date_assigned_utc,
+                date_started_utc,
+                date_completed_utc,
+                notes
+            )
+            VALUES
+            (
+                @p_record_id,
+                @p_order_line_id,
+                @p_movement_type_id,
+                @p_item_uom_id,
+                @p_quantity,
+                @p_actual_quantity,
+                @p_source_location_id,
+                @p_destination_location_id,
+                @p_task_state_id,
+                @p_assigned_to_user_id,
+                @p_priority,
+                @p_validation_type_id,
+                @p_date_assigned_utc,
+                @p_date_started_utc,
+                @p_date_completed_utc,
+                @p_notes
+            );
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    task_id,
+                    order_line_id,
+                    movement_type_id,
+                    item_uom_id,
+                    quantity,
+                    actual_quantity,
+                    source_location_id,
+                    destination_location_id,
+                    task_state_id,
+                    assigned_to_user_id,
+                    priority,
+                    validation_type_id,
+                    date_created_utc,
+                    date_assigned_utc,
+                    date_started_utc,
+                    date_completed_utc,
+                    notes
+                FROM forge.sub_order_line_task 
+                WHERE task_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            SET @l_action_type_id = 1;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'sub_order_line_task',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = NULL,
+                @p_data_after = @l_data_after,
+                @p_diff_data = NULL,
+                @p_message = 'Inserted into sub_order_line_task',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+
+    END TRY
+    BEGIN CATCH
+        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
+        DECLARE @l_err_number INT = ERROR_NUMBER();
+        DECLARE @l_err_line INT = ERROR_LINE();
+        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
+        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
+
+        SET @p_return_result_ok = 0;
+        SET @p_return_result_message = CONCAT(
+            'Error: ', @l_err_message,
+            ' (Line ', @l_err_line,
+            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
+            ', Error: ', @l_err_number, ')'
+        );
+
+        SET @l_action_type_id = CASE
+            WHEN @p_is_delete = 1 THEN 3
+            WHEN @l_exists = 1 THEN 2
+            ELSE 1
+        END;
+
+        BEGIN TRY
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_transaction_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'sub_order_line_task',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 2,
+                @p_data_before = NULL,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
+                @p_message = @p_return_result_message,
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = NULL;
+        END TRY
+        BEGIN CATCH
+        END CATCH
+    END CATCH
+END;
+GO
+PRINT N'Creating Procedure [forge].[sp_upsert_order_line]...';
+
+
+GO
+/***************************************************************************************
+  Procedure: sp_upsert_order_line
+  PK: order_line_id
+***************************************************************************************/
+CREATE PROCEDURE forge.sp_upsert_order_line
+(
+    @p_record_id UNIQUEIDENTIFIER = NULL,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_is_delete BIT = 0,
+
+    -- Table-specific columns
+    @p_transfer_order_id UNIQUEIDENTIFIER,
+    @p_item_uom_id UNIQUEIDENTIFIER,
+    @p_requested_quantity DECIMAL(10,2),
+    @p_fulfilled_quantity DECIMAL(10,2),
+    @p_fill_method_id INT,
+    @p_movement_type_id INT,
+    @p_source_location_id UNIQUEIDENTIFIER,
+    @p_destination_location_id UNIQUEIDENTIFIER,
+    @p_status_id INT,
+    @p_line_sequence INT,
+    @p_date_expected_utc DATETIME,
+    @p_date_completed_utc DATETIME = NULL,
+
+    -- Outputs
+    @p_return_result_ok BIT OUTPUT,
+    @p_return_result_message NVARCHAR(MAX) OUTPUT
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
+
+    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
+    DECLARE @l_exists BIT = 0;
+    DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
+
+    IF @p_record_id IS NOT NULL
+       AND EXISTS(SELECT 1 FROM forge.order_line WHERE order_line_id = @p_record_id)
+    BEGIN
+        SET @l_exists = 1;
+    END
+
+    BEGIN TRY
+
+        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
+        BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    order_line_id,
+                    transfer_order_id,
+                    item_uom_id,
+                    requested_quantity,
+                    fulfilled_quantity,
+                    fill_method_id,
+                    movement_type_id,
+                    source_location_id,
+                    destination_location_id,
+                    status_id,
+                    line_sequence,
+                    date_created_utc,
+                    date_expected_utc,
+                    date_completed_utc
+                FROM forge.order_line 
+                WHERE order_line_id = @p_record_id
+                FOR JSON PATH
+            );
+            
+            DELETE FROM forge.order_line
+            WHERE order_line_id = @p_record_id;
+
+            SET @l_action_type_id = 3;
+
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'order_line',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from order_line',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
+        END
+        ELSE IF @l_exists = 1
+        BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    order_line_id,
+                    transfer_order_id,
+                    item_uom_id,
+                    requested_quantity,
+                    fulfilled_quantity,
+                    fill_method_id,
+                    movement_type_id,
+                    source_location_id,
+                    destination_location_id,
+                    status_id,
+                    line_sequence,
+                    date_created_utc,
+                    date_expected_utc,
+                    date_completed_utc
+                FROM forge.order_line 
+                WHERE order_line_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            UPDATE forge.order_line
+            SET
+                transfer_order_id = @p_transfer_order_id,
+                item_uom_id = @p_item_uom_id,
+                requested_quantity = @p_requested_quantity,
+                fulfilled_quantity = @p_fulfilled_quantity,
+                fill_method_id = @p_fill_method_id,
+                movement_type_id = @p_movement_type_id,
+                source_location_id = @p_source_location_id,
+                destination_location_id = @p_destination_location_id,
+                status_id = @p_status_id,
+                line_sequence = @p_line_sequence,
+                date_expected_utc = @p_date_expected_utc,
+                date_completed_utc = @p_date_completed_utc
+            WHERE order_line_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    order_line_id,
+                    transfer_order_id,
+                    item_uom_id,
+                    requested_quantity,
+                    fulfilled_quantity,
+                    fill_method_id,
+                    movement_type_id,
+                    source_location_id,
+                    destination_location_id,
+                    status_id,
+                    line_sequence,
+                    date_created_utc,
+                    date_expected_utc,
+                    date_completed_utc
+                FROM forge.order_line 
+                WHERE order_line_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+                WITH DiffData AS (
+                    SELECT 
+                        'transfer_order_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].transfer_order_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].transfer_order_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].transfer_order_id') <> JSON_VALUE(@l_data_after, '$[0].transfer_order_id')
+                    UNION ALL
+                    SELECT 
+                        'item_uom_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].item_uom_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].item_uom_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].item_uom_id') <> JSON_VALUE(@l_data_after, '$[0].item_uom_id')
+                    UNION ALL
+                    SELECT 
+                        'requested_quantity' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].requested_quantity') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].requested_quantity') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].requested_quantity') <> JSON_VALUE(@l_data_after, '$[0].requested_quantity')
+                    UNION ALL
+                    SELECT 
+                        'fulfilled_quantity' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].fulfilled_quantity') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].fulfilled_quantity') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].fulfilled_quantity') <> JSON_VALUE(@l_data_after, '$[0].fulfilled_quantity')
+                    UNION ALL
+                    SELECT 
+                        'fill_method_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].fill_method_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].fill_method_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].fill_method_id') <> JSON_VALUE(@l_data_after, '$[0].fill_method_id')
+                    UNION ALL
+                    SELECT 
+                        'movement_type_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].movement_type_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].movement_type_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].movement_type_id') <> JSON_VALUE(@l_data_after, '$[0].movement_type_id')
+                    UNION ALL
+                    SELECT 
+                        'source_location_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].source_location_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].source_location_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].source_location_id') <> JSON_VALUE(@l_data_after, '$[0].source_location_id')
+                    UNION ALL
+                    SELECT 
+                        'destination_location_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].destination_location_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].destination_location_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].destination_location_id') <> JSON_VALUE(@l_data_after, '$[0].destination_location_id')
+                    UNION ALL
+                    SELECT 
+                        'status_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].status_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].status_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].status_id') <> JSON_VALUE(@l_data_after, '$[0].status_id')
+                    UNION ALL
+                    SELECT 
+                        'line_sequence' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].line_sequence') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].line_sequence') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].line_sequence') <> JSON_VALUE(@l_data_after, '$[0].line_sequence')
+                    UNION ALL
+                    SELECT 
+                        'date_expected_utc' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].date_expected_utc') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].date_expected_utc') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].date_expected_utc') <> JSON_VALUE(@l_data_after, '$[0].date_expected_utc')
+                    UNION ALL
+                    SELECT 
+                        'date_completed_utc' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].date_completed_utc') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].date_completed_utc') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].date_completed_utc') <> JSON_VALUE(@l_data_after, '$[0].date_completed_utc')
+                )
+                          
+               SELECT @l_diff_data = (SELECT * FROM DiffData FOR JSON PATH);
+
+            SET @l_action_type_id = 2;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'order_line',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated order_line',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE
+        BEGIN
+            IF @p_record_id IS NULL
+                SET @p_record_id = NEWID();
+
+            INSERT INTO forge.order_line
+            (
+                order_line_id,
+                transfer_order_id,
+                item_uom_id,
+                requested_quantity,
+                fulfilled_quantity,
+                fill_method_id,
+                movement_type_id,
+                source_location_id,
+                destination_location_id,
+                status_id,
+                line_sequence,
+                date_expected_utc,
+                date_completed_utc
+            )
+            VALUES
+            (
+                @p_record_id,
+                @p_transfer_order_id,
+                @p_item_uom_id,
+                @p_requested_quantity,
+                @p_fulfilled_quantity,
+                @p_fill_method_id,
+                @p_movement_type_id,
+                @p_source_location_id,
+                @p_destination_location_id,
+                @p_status_id,
+                @p_line_sequence,
+                @p_date_expected_utc,
+                @p_date_completed_utc
+            );
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    order_line_id,
+                    transfer_order_id,
+                    item_uom_id,
+                    requested_quantity,
+                    fulfilled_quantity,
+                    fill_method_id,
+                    movement_type_id,
+                    source_location_id,
+                    destination_location_id,
+                    status_id,
+                    line_sequence,
+                    date_created_utc,
+                    date_expected_utc,
+                    date_completed_utc
+                FROM forge.order_line 
+                WHERE order_line_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            SET @l_action_type_id = 1;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'order_line',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = NULL,
+                @p_data_after = @l_data_after,
+                @p_diff_data = NULL,
+                @p_message = 'Inserted into order_line',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+
+    END TRY
+    BEGIN CATCH
+        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
+        DECLARE @l_err_number INT = ERROR_NUMBER();
+        DECLARE @l_err_line INT = ERROR_LINE();
+        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
+        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
+
+        SET @p_return_result_ok = 0;
+        SET @p_return_result_message = CONCAT(
+            'Error: ', @l_err_message,
+            ' (Line ', @l_err_line,
+            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
+            ', Error: ', @l_err_number, ')'
+        );
+
+        SET @l_action_type_id = CASE
+            WHEN @p_is_delete = 1 THEN 3
+            WHEN @l_exists = 1 THEN 2
+            ELSE 1
+        END;
+
+        BEGIN TRY
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_transaction_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'order_line',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 2,
+                @p_data_before = NULL,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
+                @p_message = @p_return_result_message,
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = NULL;
+        END TRY
+        BEGIN CATCH
+        END CATCH
+    END CATCH
+END;
+GO
+PRINT N'Creating Procedure [forge].[sp_upsert_transfer_order]...';
+
+
+GO
+/***************************************************************************************
+  Procedure: sp_upsert_transfer_order
+  PK: transfer_order_id
+***************************************************************************************/
+CREATE PROCEDURE forge.sp_upsert_transfer_order
+(
+    @p_record_id UNIQUEIDENTIFIER = NULL,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_is_delete BIT = 0,
+
+    -- Table-specific columns
+    @p_order_number VARCHAR(100),
+    @p_transfer_order_type_id INT,
+    @p_status_id INT,
+    @p_source_location_id UNIQUEIDENTIFIER,
+    @p_destination_location_id UNIQUEIDENTIFIER,
+    @p_fill_method_id INT,
+    @p_priority INT,
+    @p_date_expected_utc DATETIME,
+    @p_date_completed_utc DATETIME = NULL,
+
+    -- Outputs
+    @p_return_result_ok BIT OUTPUT,
+    @p_return_result_message NVARCHAR(MAX) OUTPUT
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
+
+    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
+    DECLARE @l_exists BIT = 0;
+    DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
+
+    IF @p_record_id IS NOT NULL
+       AND EXISTS(SELECT 1 FROM forge.transfer_order WHERE transfer_order_id = @p_record_id)
+    BEGIN
+        SET @l_exists = 1;
+    END
+
+    BEGIN TRY
+
+        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
+        BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    transfer_order_id,
+                    order_number,
+                    transfer_order_type_id,
+                    transfer_order_status_id,
+                    source_location_id,
+                    destination_location_id,
+                    fill_method_id,
+                    priority,
+                    date_created_utc,
+                    date_expected_utc,
+                    date_completed_utc
+                FROM forge.transfer_order 
+                WHERE transfer_order_id = @p_record_id
+                FOR JSON PATH
+            );
+            
+            DELETE FROM forge.transfer_order
+            WHERE transfer_order_id = @p_record_id;
+
+            SET @l_action_type_id = 3;
+
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'transfer_order',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from transfer_order',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
+        END
+        ELSE IF @l_exists = 1
+        BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    transfer_order_id,
+                    order_number,
+                    transfer_order_type_id,
+                    transfer_order_status_id,
+                    source_location_id,
+                    destination_location_id,
+                    fill_method_id,
+                    priority,
+                    date_created_utc,
+                    date_expected_utc,
+                    date_completed_utc
+                FROM forge.transfer_order 
+                WHERE transfer_order_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            UPDATE forge.transfer_order
+            SET
+                order_number = @p_order_number,
+                transfer_order_type_id = @p_transfer_order_type_id,
+                transfer_order_status_id = @p_status_id,
+                source_location_id = @p_source_location_id,
+                destination_location_id = @p_destination_location_id,
+                fill_method_id = @p_fill_method_id,
+                priority = @p_priority,
+                date_expected_utc = @p_date_expected_utc,
+                date_completed_utc = @p_date_completed_utc
+            WHERE transfer_order_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    transfer_order_id,
+                    order_number,
+                    transfer_order_type_id,
+                    transfer_order_status_id,
+                    source_location_id,
+                    destination_location_id,
+                    fill_method_id,
+                    priority,
+                    date_created_utc,
+                    date_expected_utc,
+                    date_completed_utc
+                FROM forge.transfer_order 
+                WHERE transfer_order_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+                WITH DiffData AS (
+                    SELECT 
+                        'order_number' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].order_number') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].order_number') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].order_number') <> JSON_VALUE(@l_data_after, '$[0].order_number')
+                    UNION ALL
+                    SELECT 
+                        'transfer_order_type_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].transfer_order_type_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].transfer_order_type_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].transfer_order_type_id') <> JSON_VALUE(@l_data_after, '$[0].transfer_order_type_id')
+                    UNION ALL
+                    SELECT 
+                        'transfer_order_status_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].transfer_order_status_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].transfer_order_status_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].transfer_order_status_id') <> JSON_VALUE(@l_data_after, '$[0].transfer_order_status_id')
+                    UNION ALL
+                    SELECT 
+                        'source_location_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].source_location_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].source_location_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].source_location_id') <> JSON_VALUE(@l_data_after, '$[0].source_location_id')
+                    UNION ALL
+                    SELECT 
+                        'destination_location_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].destination_location_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].destination_location_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].destination_location_id') <> JSON_VALUE(@l_data_after, '$[0].destination_location_id')
+                    UNION ALL
+                    SELECT 
+                        'fill_method_id' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].fill_method_id') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].fill_method_id') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].fill_method_id') <> JSON_VALUE(@l_data_after, '$[0].fill_method_id')
+                    UNION ALL
+                    SELECT 
+                        'priority' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].priority') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].priority') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].priority') <> JSON_VALUE(@l_data_after, '$[0].priority')
+                    UNION ALL
+                    SELECT 
+                        'date_expected_utc' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].date_expected_utc') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].date_expected_utc') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].date_expected_utc') <> JSON_VALUE(@l_data_after, '$[0].date_expected_utc')
+                    UNION ALL
+                    SELECT 
+                        'date_completed_utc' as [field],
+                        JSON_VALUE(@l_data_before, '$[0].date_completed_utc') as [old_value],
+                        JSON_VALUE(@l_data_after, '$[0].date_completed_utc') as [new_value]
+                    WHERE JSON_VALUE(@l_data_before, '$[0].date_completed_utc') <> JSON_VALUE(@l_data_after, '$[0].date_completed_utc')
+                )
+                SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH);
+
+            SET @l_action_type_id = 2;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'transfer_order',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated transfer_order',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE
+        BEGIN
+            IF @p_record_id IS NULL
+                SET @p_record_id = NEWID();
+
+            INSERT INTO forge.transfer_order
+            (
+                transfer_order_id,
+                order_number,
+                transfer_order_type_id,
+                transfer_order_status_id,
+                source_location_id,
+                destination_location_id,
+                fill_method_id,
+                priority,
+                date_expected_utc,
+                date_completed_utc
+            )
+            VALUES
+            (
+                @p_record_id,
+                @p_order_number,
+                @p_transfer_order_type_id,
+                @p_status_id,
+                @p_source_location_id,
+                @p_destination_location_id,
+                @p_fill_method_id,
+                @p_priority,
+                @p_date_expected_utc,
+                @p_date_completed_utc
+            );
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    transfer_order_id,
+                    order_number,
+                    transfer_order_type_id,
+                    transfer_order_status_id,
+                    source_location_id,
+                    destination_location_id,
+                    fill_method_id,
+                    priority,
+                    date_created_utc,
+                    date_expected_utc,
+                    date_completed_utc
+                FROM forge.transfer_order 
+                WHERE transfer_order_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            SET @l_action_type_id = 1;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'transfer_order',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = NULL,
+                @p_data_after = @l_data_after,
+                @p_diff_data = NULL,
+                @p_message = 'Inserted into transfer_order',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+
+    END TRY
+    BEGIN CATCH
+        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
+        DECLARE @l_err_number INT = ERROR_NUMBER();
+        DECLARE @l_err_line INT = ERROR_LINE();
+        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
+        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
+
+        SET @p_return_result_ok = 0;
+        SET @p_return_result_message = CONCAT(
+            'Error: ', @l_err_message,
+            ' (Line ', @l_err_line,
+            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
+            ', Error: ', @l_err_number, ')'
+        );
+
+        SET @l_action_type_id = CASE
+            WHEN @p_is_delete = 1 THEN 3
+            WHEN @l_exists = 1 THEN 2
+            ELSE 1
+        END;
+
+        BEGIN TRY
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_transaction_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'transfer_order',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 2,
+                @p_data_before = NULL,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
+                @p_message = @p_return_result_message,
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = NULL;
+        END TRY
+        BEGIN CATCH
+        END CATCH
+    END CATCH
+END;
+GO
+PRINT N'Creating Procedure [forge].[sp_upsert_stock]...';
+
+
+GO
+/***************************************************************************************
+  Procedure: sp_upsert_stock
+  PK: stock_id
+***************************************************************************************/
+CREATE PROCEDURE forge.sp_upsert_stock
+(
+    @p_record_id UNIQUEIDENTIFIER = NULL,
+    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_is_delete BIT = 0,
+
+    -- Table-specific columns
+    @p_item_uom_id UNIQUEIDENTIFIER,
+    @p_storage_location_id UNIQUEIDENTIFIER,
+    @p_quantity_on_hand INT,
+    @p_quantity_allocated INT,
+    @p_stock_status_id INT,
+
+    -- Outputs
+    @p_return_result_ok BIT OUTPUT,
+    @p_return_result_message NVARCHAR(MAX) OUTPUT
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Default to NONE user if no user ID is provided
+    IF @p_created_by_user_id IS NULL
+        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
+
+    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
+    DECLARE @l_exists BIT = 0;
+    DECLARE @l_action_type_id INT;
+    DECLARE @l_data_before NVARCHAR(MAX);
+    DECLARE @l_data_after NVARCHAR(MAX);
+    DECLARE @l_diff_data NVARCHAR(MAX);
+
+    IF @p_record_id IS NOT NULL
+       AND EXISTS(SELECT 1 FROM forge.stock WHERE stock_id = @p_record_id)
+    BEGIN
+        SET @l_exists = 1;
+    END
+
+    BEGIN TRY
+
+        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
+        BEGIN
+            -- Capture data before deletion
+            SELECT @l_data_before = (
+                SELECT 
+                    stock_id,
+                    item_uom_id,
+                    storage_location_id,
+                    quantity_on_hand,
+                    quantity_allocated,
+                    stock_status_id,
+                    date_created_utc,
+                    date_modified_utc
+                FROM forge.stock 
+                WHERE stock_id = @p_record_id
+                FOR JSON PATH
+            );
+            
+            DELETE FROM forge.stock
+            WHERE stock_id = @p_record_id;
+
+            SET @l_action_type_id = 3;
+
+            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = 'FORGE',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'stock',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from stock',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
+        END
+        ELSE IF @l_exists = 1
+        BEGIN
+            -- Capture data before update
+            SELECT @l_data_before = (
+                SELECT 
+                    stock_id,
+                    item_uom_id,
+                    storage_location_id,
+                    quantity_on_hand,
+                    quantity_allocated,
+                    stock_status_id,
+                    date_created_utc,
+                    date_modified_utc
+                FROM forge.stock 
+                WHERE stock_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            UPDATE forge.stock
+            SET
+                item_uom_id = @p_item_uom_id,
+                storage_location_id = @p_storage_location_id,
+                quantity_on_hand = @p_quantity_on_hand,
+                quantity_allocated = @p_quantity_allocated,
+                stock_status_id = @p_stock_status_id,
+                date_modified_utc = GETUTCDATE()
+            WHERE stock_id = @p_record_id;
+
+            -- Capture data after update
+            SELECT @l_data_after = (
+                SELECT 
+                    stock_id,
+                    item_uom_id,
+                    storage_location_id,
+                    quantity_on_hand,
+                    quantity_allocated,
+                    stock_status_id,
+                    date_created_utc,
+                    date_modified_utc
+                FROM forge.stock 
+                WHERE stock_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            -- Generate diff data
+            WITH DiffData AS (
+                SELECT 
+                    'item_uom_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].item_uom_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].item_uom_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].item_uom_id') <> JSON_VALUE(@l_data_after, '$[0].item_uom_id')
+                UNION ALL
+                SELECT 
+                    'storage_location_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].storage_location_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].storage_location_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].storage_location_id') <> JSON_VALUE(@l_data_after, '$[0].storage_location_id')
+                UNION ALL
+                SELECT 
+                    'quantity_on_hand' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].quantity_on_hand') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].quantity_on_hand') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].quantity_on_hand') <> JSON_VALUE(@l_data_after, '$[0].quantity_on_hand')
+                UNION ALL
+                SELECT 
+                    'quantity_allocated' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].quantity_allocated') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].quantity_allocated') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].quantity_allocated') <> JSON_VALUE(@l_data_after, '$[0].quantity_allocated')
+                UNION ALL
+                SELECT 
+                    'stock_status_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].stock_status_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].stock_status_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].stock_status_id') <> JSON_VALUE(@l_data_after, '$[0].stock_status_id')
+            )
+            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
+
+            SET @l_action_type_id = 2;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'stock',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = @l_data_before,
+                @p_data_after = @l_data_after,
+                @p_diff_data = @l_diff_data,
+                @p_message = 'Updated stock',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+        ELSE
+        BEGIN
+            IF @p_record_id IS NULL
+                SET @p_record_id = NEWID();
+
+            INSERT INTO forge.stock
+            (
+                stock_id,
+                item_uom_id,
+                storage_location_id,
+                quantity_on_hand,
+                quantity_allocated,
+                stock_status_id
+            )
+            VALUES
+            (
+                @p_record_id,
+                @p_item_uom_id,
+                @p_storage_location_id,
+                @p_quantity_on_hand,
+                @p_quantity_allocated,
+                @p_stock_status_id
+            );
+
+            -- Capture data after insert
+            SELECT @l_data_after = (
+                SELECT 
+                    stock_id,
+                    item_uom_id,
+                    storage_location_id,
+                    quantity_on_hand,
+                    quantity_allocated,
+                    stock_status_id,
+                    date_created_utc,
+                    date_modified_utc
+                FROM forge.stock 
+                WHERE stock_id = @p_record_id
+                FOR JSON PATH
+            );
+
+            SET @l_action_type_id = 1;
+
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'stock',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = @l_action_type_id,
+                @p_status_code_id = 1,
+                @p_data_before = NULL,
+                @p_data_after = @l_data_after,
+                @p_diff_data = NULL,
+                @p_message = 'Inserted into stock',
+                @p_context_id = NULL,
+                @p_return_result_ok = @p_return_result_ok OUTPUT,
+                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_logging_id_out = @l_log_id OUTPUT;
+        END
+
+    END TRY
+    BEGIN CATCH
+        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
+        DECLARE @l_err_number INT = ERROR_NUMBER();
+        DECLARE @l_err_line INT = ERROR_LINE();
+        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
+        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
+
+        SET @p_return_result_ok = 0;
+        SET @p_return_result_message = CONCAT(
+            'Error: ', @l_err_message,
+            ' (Line ', @l_err_line,
+            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
+            ', Error: ', @l_err_number, ')'
+        );
+
+        SET @l_action_type_id = CASE
+            WHEN @p_is_delete = 1 THEN 3
+            WHEN @l_exists = 1 THEN 2
+            ELSE 1
+        END;
+
+        BEGIN TRY
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_transaction_log_id,
+                @p_source_system = 'FORGE',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'stock',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 2,
@@ -5431,967 +7858,31 @@ BEGIN
     END CATCH
 END;
 GO
-PRINT N'Creating Procedure [forge].[sp_upsert_item_uom]...';
+PRINT N'Creating Procedure [forge].[sp_upsert_inventory_count]...';
 
 
 GO
 /***************************************************************************************
-  Procedure: sp_upsert_item_uom
-  PK: item_uom_id
+  Procedure: sp_upsert_inventory_count
+  PK: inventory_count_id
 ***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_item_uom
+CREATE PROCEDURE forge.sp_upsert_inventory_count
 (
     @p_record_id UNIQUEIDENTIFIER = NULL,
     @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
 
     -- Table-specific columns
-    @p_item_id UNIQUEIDENTIFIER,
-    @p_uom_code VARCHAR(20),
-    @p_item_code VARCHAR(100),
-    @p_conversion_factor DECIMAL(10,2),
-    @p_required_location_type_id INT,
-    @p_description VARCHAR(255),
-    @p_default_weight DECIMAL(10,2),
-    @p_default_height DECIMAL(10,2),
-    @p_default_width DECIMAL(10,2),
-    @p_default_length DECIMAL(10,2),
-    @p_is_primary BIT,
-
-    -- Outputs
-    @p_return_result_ok BIT OUTPUT,
-    @p_return_result_message NVARCHAR(MAX) OUTPUT
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Default to NONE user if no user ID is provided
-    IF @p_created_by_user_id IS NULL
-        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
-
-    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
-    DECLARE @l_exists BIT = 0;
-    DECLARE @l_action_type_id INT;
-    DECLARE @l_data_before NVARCHAR(MAX);
-    DECLARE @l_data_after NVARCHAR(MAX);
-    DECLARE @l_diff_data NVARCHAR(MAX);
-
-    IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.item_uom WHERE item_uom_id = @p_record_id)
-    BEGIN
-        SET @l_exists = 1;
-    END
-
-    BEGIN TRY
-
-        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
-        BEGIN
-            -- Capture data before deletion
-            SELECT @l_data_before = (
-                SELECT 
-                    item_uom_id,
-                    item_id,
-                    uom_code,
-                    conversion_factor,
-                    is_primary
-                FROM forge.item_uom 
-                WHERE item_uom_id = @p_record_id
-                FOR JSON PATH
-            );
-            
-            DELETE FROM forge.item_uom
-            WHERE item_uom_id = @p_record_id;
-
-            SET @l_action_type_id = 3;
-
-            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
-            BEGIN
-                EXEC core.sp_log_transaction
-                    @p_logging_id = @l_log_id,
-                    @p_source_system = 'FORGE',
-                    @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'item_uom',
-                    @p_object_id = @p_record_id,
-                    @p_action_type_id = @l_action_type_id,
-                    @p_status_code_id = 1,
-                    @p_data_before = @l_data_before,
-                    @p_data_after = NULL,
-                    @p_diff_data = NULL,
-                    @p_message = 'Deleted from item_uom',
-                    @p_context_id = NULL,
-                    @p_return_result_ok = @p_return_result_ok OUTPUT,
-                    @p_return_result_message = @p_return_result_message OUTPUT,
-                    @p_logging_id_out = @l_log_id OUTPUT;
-            END
-        END
-        ELSE IF @l_exists = 1
-        BEGIN
-            -- Capture data before update
-            SELECT @l_data_before = (
-                SELECT 
-                    item_uom_id,
-                    item_id,
-                    uom_code,
-                    conversion_factor,
-                    is_primary
-                FROM forge.item_uom 
-                WHERE item_uom_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            UPDATE forge.item_uom
-            SET
-                item_id = @p_item_id,
-                uom_code = @p_uom_code,
-                item_code = @p_item_code,
-                conversion_factor = @p_conversion_factor,
-                required_location_type_id = @p_required_location_type_id,
-                description = @p_description,
-                default_weight = @p_default_weight,
-                default_height = @p_default_height,
-                default_width = @p_default_width,
-                default_length = @p_default_length,
-                is_primary = @p_is_primary
-            WHERE item_uom_id = @p_record_id;
-
-            -- Capture data after update
-            SELECT @l_data_after = (
-                SELECT 
-                    item_uom_id,
-                    item_id,
-                    uom_code,
-                    conversion_factor,
-                    is_primary
-                FROM forge.item_uom 
-                WHERE item_uom_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            -- Generate diff data
-            WITH DiffData AS (
-                SELECT 
-                    'item_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].item_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].item_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].item_id') <> JSON_VALUE(@l_data_after, '$[0].item_id')
-                UNION ALL
-                SELECT 
-                    'uom_code' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].uom_code') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].uom_code') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].uom_code') <> JSON_VALUE(@l_data_after, '$[0].uom_code')
-                UNION ALL
-                SELECT 
-                    'conversion_factor' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].conversion_factor') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].conversion_factor') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].conversion_factor') <> JSON_VALUE(@l_data_after, '$[0].conversion_factor')
-                UNION ALL
-                SELECT 
-                    'is_primary' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].is_primary') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].is_primary') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].is_primary') <> JSON_VALUE(@l_data_after, '$[0].is_primary')
-            )
-            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
-
-            SET @l_action_type_id = 2;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'item_uom',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = @l_data_after,
-                @p_diff_data = @l_diff_data,
-                @p_message = 'Updated item_uom',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-        ELSE
-        BEGIN
-            IF @p_record_id IS NULL
-                SET @p_record_id = NEWID();
-
-            INSERT INTO forge.item_uom
-            (
-                item_uom_id,
-                item_id,
-                uom_code,
-                item_code,
-                conversion_factor,
-                required_location_type_id,
-                description,
-                default_weight,
-                default_height,
-                default_width,
-                default_length,
-                is_primary
-            )
-            VALUES
-            (
-                @p_record_id,
-                @p_item_id,
-                @p_uom_code,
-                @p_item_code,
-                @p_conversion_factor,
-                @p_required_location_type_id,
-                @p_description,
-                @p_default_weight,
-                @p_default_height,
-                @p_default_width,
-                @p_default_length,
-                @p_is_primary
-            );
-
-            -- Capture data after insert
-            SELECT @l_data_after = (
-                SELECT 
-                    item_uom_id,
-                    item_id,
-                    uom_code,
-                    conversion_factor,
-                    is_primary
-                FROM forge.item_uom 
-                WHERE item_uom_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            SET @l_action_type_id = 1;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'item_uom',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = @l_data_after,
-                @p_diff_data = NULL,
-                @p_message = 'Inserted into item_uom',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-
-    END TRY
-    BEGIN CATCH
-        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
-        DECLARE @l_err_number INT = ERROR_NUMBER();
-        DECLARE @l_err_line INT = ERROR_LINE();
-        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
-        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
-
-        SET @p_return_result_ok = 0;
-        SET @p_return_result_message = CONCAT(
-            'Error: ', @l_err_message,
-            ' (Line ', @l_err_line,
-            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
-            ', Error: ', @l_err_number, ')'
-        );
-
-        SET @l_action_type_id = CASE
-            WHEN @p_is_delete = 1 THEN 3
-            WHEN @l_exists = 1 THEN 2
-            ELSE 1
-        END;
-
-        BEGIN TRY
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_transaction_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'item_uom',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = @p_return_result_message,
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = NULL;
-        END TRY
-        BEGIN CATCH
-        END CATCH
-    END CATCH
-END;
-GO
-PRINT N'Creating Procedure [forge].[sp_upsert_item]...';
-
-
-GO
-/***************************************************************************************
-  Procedure: sp_upsert_item
-  PK: item_id
-***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_item
-(
-    @p_record_id UNIQUEIDENTIFIER = NULL,
-    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
-    @p_is_delete BIT = 0,
-
-    -- Table-specific columns
-    @p_item_number VARCHAR(100),
-    @p_description VARCHAR(255),
-    @p_item_status_id INT,
-
-    -- Outputs
-    @p_return_result_ok BIT OUTPUT,
-    @p_return_result_message NVARCHAR(MAX) OUTPUT
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Default to NONE user if no user ID is provided
-    IF @p_created_by_user_id IS NULL
-        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
-
-    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
-    DECLARE @l_exists BIT = 0;
-    DECLARE @l_action_type_id INT;
-    DECLARE @l_data_before NVARCHAR(MAX);
-    DECLARE @l_data_after NVARCHAR(MAX);
-    DECLARE @l_diff_data NVARCHAR(MAX);
-
-    IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.item WHERE item_id = @p_record_id)
-    BEGIN
-        SET @l_exists = 1;
-    END
-
-    BEGIN TRY
-
-        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
-        BEGIN
-            -- Capture data before deletion
-            SELECT @l_data_before = (
-                SELECT 
-                    item_id,
-                    item_number,
-                    description,
-                    item_status_id
-                FROM forge.item 
-                WHERE item_id = @p_record_id
-                FOR JSON PATH
-            );
-            
-            DELETE FROM forge.item
-            WHERE item_id = @p_record_id;
-
-            SET @l_action_type_id = 3;
-
-            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
-            BEGIN
-                EXEC core.sp_log_transaction
-                    @p_logging_id = @l_log_id,
-                    @p_source_system = 'FORGE',
-                    @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'item',
-                    @p_object_id = @p_record_id,
-                    @p_action_type_id = @l_action_type_id,
-                    @p_status_code_id = 1,
-                    @p_data_before = @l_data_before,
-                    @p_data_after = NULL,
-                    @p_diff_data = NULL,
-                    @p_message = 'Deleted from item',
-                    @p_context_id = NULL,
-                    @p_return_result_ok = @p_return_result_ok OUTPUT,
-                    @p_return_result_message = @p_return_result_message OUTPUT,
-                    @p_logging_id_out = @l_log_id OUTPUT;
-            END
-        END
-        ELSE IF @l_exists = 1
-        BEGIN
-            -- Capture data before update
-            SELECT @l_data_before = (
-                SELECT 
-                    item_id,
-                    item_number,
-                    description,
-                    item_status_id
-                FROM forge.item 
-                WHERE item_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            UPDATE forge.item
-            SET
-                item_number = @p_item_number,
-                description = @p_description,
-                item_status_id = @p_item_status_id
-            WHERE item_id = @p_record_id;
-
-            -- Capture data after update
-            SELECT @l_data_after = (
-                SELECT 
-                    item_id,
-                    item_number,
-                    description,
-                    item_status_id
-                FROM forge.item 
-                WHERE item_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            -- Generate diff data
-            WITH DiffData AS (
-                SELECT 
-                    'item_number' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].item_number') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].item_number') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].item_number') <> JSON_VALUE(@l_data_after, '$[0].item_number')
-                UNION ALL
-                SELECT 
-                    'description' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].description') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].description') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].description') <> JSON_VALUE(@l_data_after, '$[0].description')
-                UNION ALL
-                SELECT 
-                    'status_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].status_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].status_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].status_id') <> JSON_VALUE(@l_data_after, '$[0].status_id')
-            )
-            SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
-
-            SET @l_action_type_id = 2;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'item',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = @l_data_after,
-                @p_diff_data = @l_diff_data,
-                @p_message = 'Updated item',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-        ELSE
-        BEGIN
-            IF @p_record_id IS NULL
-                SET @p_record_id = NEWID();
-
-            INSERT INTO forge.item
-            (
-                item_id,
-                item_number,
-                description,
-                item_status_id
-            )
-            VALUES
-            (
-                @p_record_id,
-                @p_item_number,
-                @p_description,
-                @p_item_status_id
-            );
-
-            -- Capture data after insert
-            SELECT @l_data_after = (
-                SELECT 
-                    item_id,
-                    item_number,
-                    description,
-                    item_status_id
-                FROM forge.item 
-                WHERE item_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            SET @l_action_type_id = 1;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'item',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = @l_data_after,
-                @p_diff_data = NULL,
-                @p_message = 'Inserted into item',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-
-    END TRY
-    BEGIN CATCH
-        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
-        DECLARE @l_err_number INT = ERROR_NUMBER();
-        DECLARE @l_err_line INT = ERROR_LINE();
-        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
-        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
-
-        SET @p_return_result_ok = 0;
-        SET @p_return_result_message = CONCAT(
-            'Error: ', @l_err_message,
-            ' (Line ', @l_err_line,
-            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
-            ', Error: ', @l_err_number, ')'
-        );
-
-        SET @l_action_type_id = CASE
-            WHEN @p_is_delete = 1 THEN 3
-            WHEN @l_exists = 1 THEN 2
-            ELSE 1
-        END;
-
-        BEGIN TRY
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_transaction_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'item',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = @p_return_result_message,
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = NULL;
-        END TRY
-        BEGIN CATCH
-        END CATCH
-    END CATCH
-END;
-GO
-PRINT N'Creating Procedure [forge].[sp_upsert_order_line]...';
-
-
-GO
-/***************************************************************************************
-  Procedure: sp_upsert_order_line
-  PK: order_line_id
-***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_order_line
-(
-    @p_record_id UNIQUEIDENTIFIER = NULL,
-    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
-    @p_is_delete BIT = 0,
-
-    -- Table-specific columns
-    @p_transfer_order_id UNIQUEIDENTIFIER,
-    @p_item_uom_id UNIQUEIDENTIFIER,
-    @p_requested_quantity DECIMAL(10,2),
-    @p_fulfilled_quantity DECIMAL(10,2),
-    @p_fill_method_id INT,
-    @p_movement_type_id INT,
-    @p_source_location_id UNIQUEIDENTIFIER,
-    @p_destination_location_id UNIQUEIDENTIFIER,
-    @p_status_id INT,
-    @p_line_sequence INT,
-    @p_date_expected_utc DATETIME,
-    @p_date_completed_utc DATETIME = NULL,
-
-    -- Outputs
-    @p_return_result_ok BIT OUTPUT,
-    @p_return_result_message NVARCHAR(MAX) OUTPUT
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Default to NONE user if no user ID is provided
-    IF @p_created_by_user_id IS NULL
-        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
-
-    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
-    DECLARE @l_exists BIT = 0;
-    DECLARE @l_action_type_id INT;
-    DECLARE @l_data_before NVARCHAR(MAX);
-    DECLARE @l_data_after NVARCHAR(MAX);
-    DECLARE @l_diff_data NVARCHAR(MAX);
-
-    IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.order_line WHERE order_line_id = @p_record_id)
-    BEGIN
-        SET @l_exists = 1;
-    END
-
-    BEGIN TRY
-
-        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
-        BEGIN
-            -- Capture data before deletion
-            SELECT @l_data_before = (
-                SELECT 
-                    order_line_id,
-                    transfer_order_id,
-                    item_uom_id,
-                    requested_quantity,
-                    fulfilled_quantity,
-                    fill_method_id,
-                    movement_type_id,
-                    source_location_id,
-                    destination_location_id,
-                    status_id,
-                    line_sequence,
-                    date_created_utc,
-                    date_expected_utc,
-                    date_completed_utc
-                FROM forge.order_line 
-                WHERE order_line_id = @p_record_id
-                FOR JSON PATH
-            );
-            
-            DELETE FROM forge.order_line
-            WHERE order_line_id = @p_record_id;
-
-            SET @l_action_type_id = 3;
-
-            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
-            BEGIN
-                EXEC core.sp_log_transaction
-                    @p_logging_id = @l_log_id,
-                    @p_source_system = 'FORGE',
-                    @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'order_line',
-                    @p_object_id = @p_record_id,
-                    @p_action_type_id = @l_action_type_id,
-                    @p_status_code_id = 1,
-                    @p_data_before = @l_data_before,
-                    @p_data_after = NULL,
-                    @p_diff_data = NULL,
-                    @p_message = 'Deleted from order_line',
-                    @p_context_id = NULL,
-                    @p_return_result_ok = @p_return_result_ok OUTPUT,
-                    @p_return_result_message = @p_return_result_message OUTPUT,
-                    @p_logging_id_out = @l_log_id OUTPUT;
-            END
-        END
-        ELSE IF @l_exists = 1
-        BEGIN
-            -- Capture data before update
-            SELECT @l_data_before = (
-                SELECT 
-                    order_line_id,
-                    transfer_order_id,
-                    item_uom_id,
-                    requested_quantity,
-                    fulfilled_quantity,
-                    fill_method_id,
-                    movement_type_id,
-                    source_location_id,
-                    destination_location_id,
-                    status_id,
-                    line_sequence,
-                    date_created_utc,
-                    date_expected_utc,
-                    date_completed_utc
-                FROM forge.order_line 
-                WHERE order_line_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            UPDATE forge.order_line
-            SET
-                transfer_order_id = @p_transfer_order_id,
-                item_uom_id = @p_item_uom_id,
-                requested_quantity = @p_requested_quantity,
-                fulfilled_quantity = @p_fulfilled_quantity,
-                fill_method_id = @p_fill_method_id,
-                movement_type_id = @p_movement_type_id,
-                source_location_id = @p_source_location_id,
-                destination_location_id = @p_destination_location_id,
-                status_id = @p_status_id,
-                line_sequence = @p_line_sequence,
-                date_expected_utc = @p_date_expected_utc,
-                date_completed_utc = @p_date_completed_utc
-            WHERE order_line_id = @p_record_id;
-
-            -- Capture data after update
-            SELECT @l_data_after = (
-                SELECT 
-                    order_line_id,
-                    transfer_order_id,
-                    item_uom_id,
-                    requested_quantity,
-                    fulfilled_quantity,
-                    fill_method_id,
-                    movement_type_id,
-                    source_location_id,
-                    destination_location_id,
-                    status_id,
-                    line_sequence,
-                    date_created_utc,
-                    date_expected_utc,
-                    date_completed_utc
-                FROM forge.order_line 
-                WHERE order_line_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            -- Generate diff data
-                WITH DiffData AS (
-                    SELECT 
-                        'transfer_order_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].transfer_order_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].transfer_order_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].transfer_order_id') <> JSON_VALUE(@l_data_after, '$[0].transfer_order_id')
-                    UNION ALL
-                    SELECT 
-                        'item_uom_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].item_uom_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].item_uom_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].item_uom_id') <> JSON_VALUE(@l_data_after, '$[0].item_uom_id')
-                    UNION ALL
-                    SELECT 
-                        'requested_quantity' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].requested_quantity') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].requested_quantity') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].requested_quantity') <> JSON_VALUE(@l_data_after, '$[0].requested_quantity')
-                    UNION ALL
-                    SELECT 
-                        'fulfilled_quantity' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].fulfilled_quantity') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].fulfilled_quantity') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].fulfilled_quantity') <> JSON_VALUE(@l_data_after, '$[0].fulfilled_quantity')
-                    UNION ALL
-                    SELECT 
-                        'fill_method_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].fill_method_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].fill_method_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].fill_method_id') <> JSON_VALUE(@l_data_after, '$[0].fill_method_id')
-                    UNION ALL
-                    SELECT 
-                        'movement_type_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].movement_type_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].movement_type_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].movement_type_id') <> JSON_VALUE(@l_data_after, '$[0].movement_type_id')
-                    UNION ALL
-                    SELECT 
-                        'source_location_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].source_location_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].source_location_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].source_location_id') <> JSON_VALUE(@l_data_after, '$[0].source_location_id')
-                    UNION ALL
-                    SELECT 
-                        'destination_location_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].destination_location_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].destination_location_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].destination_location_id') <> JSON_VALUE(@l_data_after, '$[0].destination_location_id')
-                    UNION ALL
-                    SELECT 
-                        'status_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].status_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].status_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].status_id') <> JSON_VALUE(@l_data_after, '$[0].status_id')
-                    UNION ALL
-                    SELECT 
-                        'line_sequence' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].line_sequence') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].line_sequence') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].line_sequence') <> JSON_VALUE(@l_data_after, '$[0].line_sequence')
-                    UNION ALL
-                    SELECT 
-                        'date_expected_utc' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].date_expected_utc') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].date_expected_utc') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].date_expected_utc') <> JSON_VALUE(@l_data_after, '$[0].date_expected_utc')
-                    UNION ALL
-                    SELECT 
-                        'date_completed_utc' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].date_completed_utc') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].date_completed_utc') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].date_completed_utc') <> JSON_VALUE(@l_data_after, '$[0].date_completed_utc')
-                )
-                          
-               SELECT @l_diff_data = (SELECT * FROM DiffData FOR JSON PATH);
-
-            SET @l_action_type_id = 2;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'order_line',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = @l_data_after,
-                @p_diff_data = @l_diff_data,
-                @p_message = 'Updated order_line',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-        ELSE
-        BEGIN
-            IF @p_record_id IS NULL
-                SET @p_record_id = NEWID();
-
-            INSERT INTO forge.order_line
-            (
-                order_line_id,
-                transfer_order_id,
-                item_uom_id,
-                requested_quantity,
-                fulfilled_quantity,
-                fill_method_id,
-                movement_type_id,
-                source_location_id,
-                destination_location_id,
-                status_id,
-                line_sequence,
-                date_expected_utc,
-                date_completed_utc
-            )
-            VALUES
-            (
-                @p_record_id,
-                @p_transfer_order_id,
-                @p_item_uom_id,
-                @p_requested_quantity,
-                @p_fulfilled_quantity,
-                @p_fill_method_id,
-                @p_movement_type_id,
-                @p_source_location_id,
-                @p_destination_location_id,
-                @p_status_id,
-                @p_line_sequence,
-                @p_date_expected_utc,
-                @p_date_completed_utc
-            );
-
-            -- Capture data after insert
-            SELECT @l_data_after = (
-                SELECT 
-                    order_line_id,
-                    transfer_order_id,
-                    item_uom_id,
-                    requested_quantity,
-                    fulfilled_quantity,
-                    fill_method_id,
-                    movement_type_id,
-                    source_location_id,
-                    destination_location_id,
-                    status_id,
-                    line_sequence,
-                    date_created_utc,
-                    date_expected_utc,
-                    date_completed_utc
-                FROM forge.order_line 
-                WHERE order_line_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            SET @l_action_type_id = 1;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'order_line',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = @l_data_after,
-                @p_diff_data = NULL,
-                @p_message = 'Inserted into order_line',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-
-    END TRY
-    BEGIN CATCH
-        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
-        DECLARE @l_err_number INT = ERROR_NUMBER();
-        DECLARE @l_err_line INT = ERROR_LINE();
-        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
-        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
-
-        SET @p_return_result_ok = 0;
-        SET @p_return_result_message = CONCAT(
-            'Error: ', @l_err_message,
-            ' (Line ', @l_err_line,
-            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
-            ', Error: ', @l_err_number, ')'
-        );
-
-        SET @l_action_type_id = CASE
-            WHEN @p_is_delete = 1 THEN 3
-            WHEN @l_exists = 1 THEN 2
-            ELSE 1
-        END;
-
-        BEGIN TRY
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_transaction_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'order_line',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = @p_return_result_message,
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = NULL;
-        END TRY
-        BEGIN CATCH
-        END CATCH
-    END CATCH
-END;
-GO
-PRINT N'Creating Procedure [forge].[sp_upsert_stock]...';
-
-
-GO
-/***************************************************************************************
-  Procedure: sp_upsert_stock
-  PK: stock_id
-***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_stock
-(
-    @p_record_id UNIQUEIDENTIFIER = NULL,
-    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
-    @p_is_delete BIT = 0,
-
-    -- Table-specific columns
-    @p_item_uom_id UNIQUEIDENTIFIER,
+    @p_inventory_document_id UNIQUEIDENTIFIER,
     @p_storage_location_id UNIQUEIDENTIFIER,
-    @p_quantity_on_hand INT,
-    @p_quantity_allocated INT,
-    @p_stock_status_id INT,
+    @p_item_uom_id UNIQUEIDENTIFIER,
+    @p_expected_quantity INT,
+    @p_counted_quantity INT,
+    @p_count_status VARCHAR(50),
+    @p_counted_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_validated_by_user_id UNIQUEIDENTIFIER = NULL,
+    @p_date_counted_utc DATETIME = NULL,
+    @p_date_validated_utc DATETIME = NULL,
 
     -- Outputs
     @p_return_result_ok BIT OUTPUT,
@@ -6413,7 +7904,7 @@ BEGIN
     DECLARE @l_diff_data NVARCHAR(MAX);
 
     IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.stock WHERE stock_id = @p_record_id)
+       AND EXISTS(SELECT 1 FROM forge.inventory_count WHERE inventory_count_id = @p_record_id)
     BEGIN
         SET @l_exists = 1;
     END
@@ -6425,21 +7916,26 @@ BEGIN
             -- Capture data before deletion
             SELECT @l_data_before = (
                 SELECT 
-                    stock_id,
-                    item_uom_id,
+                    inventory_count_id,
+                    inventory_document_id,
                     storage_location_id,
-                    quantity_on_hand,
-                    quantity_allocated,
-                    stock_status_id,
+                    item_uom_id,
+                    expected_quantity,
+                    counted_quantity,
+                    count_status,
+                    counted_by_user_id,
+                    validated_by_user_id,
+                    date_counted_utc,
+                    date_validated_utc,
                     date_created_utc,
-                    date_modified_utc
-                FROM forge.stock 
-                WHERE stock_id = @p_record_id
+                    date_updated_utc
+                FROM forge.inventory_count 
+                WHERE inventory_count_id = @p_record_id
                 FOR JSON PATH
             );
             
-            DELETE FROM forge.stock
-            WHERE stock_id = @p_record_id;
+            DELETE FROM forge.inventory_count
+            WHERE inventory_count_id = @p_record_id;
 
             SET @l_action_type_id = 3;
 
@@ -6449,14 +7945,14 @@ BEGIN
                     @p_logging_id = @l_log_id,
                     @p_source_system = 'FORGE',
                     @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'stock',
+                    @p_object_name = 'inventory_count',
                     @p_object_id = @p_record_id,
                     @p_action_type_id = @l_action_type_id,
                     @p_status_code_id = 1,
                     @p_data_before = @l_data_before,
                     @p_data_after = NULL,
                     @p_diff_data = NULL,
-                    @p_message = 'Deleted from stock',
+                    @p_message = 'Deleted from inventory_count',
                     @p_context_id = NULL,
                     @p_return_result_ok = @p_return_result_ok OUTPUT,
                     @p_return_result_message = @p_return_result_message OUTPUT,
@@ -6468,52 +7964,67 @@ BEGIN
             -- Capture data before update
             SELECT @l_data_before = (
                 SELECT 
-                    stock_id,
-                    item_uom_id,
+                    inventory_count_id,
+                    inventory_document_id,
                     storage_location_id,
-                    quantity_on_hand,
-                    quantity_allocated,
-                    stock_status_id,
+                    item_uom_id,
+                    expected_quantity,
+                    counted_quantity,
+                    count_status,
+                    counted_by_user_id,
+                    validated_by_user_id,
+                    date_counted_utc,
+                    date_validated_utc,
                     date_created_utc,
-                    date_modified_utc
-                FROM forge.stock 
-                WHERE stock_id = @p_record_id
+                    date_updated_utc
+                FROM forge.inventory_count 
+                WHERE inventory_count_id = @p_record_id
                 FOR JSON PATH
             );
 
-            UPDATE forge.stock
+            UPDATE forge.inventory_count
             SET
-                item_uom_id = @p_item_uom_id,
+                inventory_document_id = @p_inventory_document_id,
                 storage_location_id = @p_storage_location_id,
-                quantity_on_hand = @p_quantity_on_hand,
-                quantity_allocated = @p_quantity_allocated,
-                stock_status_id = @p_stock_status_id,
-                date_modified_utc = GETUTCDATE()
-            WHERE stock_id = @p_record_id;
+                item_uom_id = @p_item_uom_id,
+                expected_quantity = @p_expected_quantity,
+                counted_quantity = @p_counted_quantity,
+                count_status = @p_count_status,
+                counted_by_user_id = @p_counted_by_user_id,
+                validated_by_user_id = @p_validated_by_user_id,
+                date_counted_utc = @p_date_counted_utc,
+                date_validated_utc = @p_date_validated_utc,
+                date_updated_utc = GETUTCDATE()
+            WHERE inventory_count_id = @p_record_id;
 
             -- Capture data after update
             SELECT @l_data_after = (
                 SELECT 
-                    stock_id,
-                    item_uom_id,
+                    inventory_count_id,
+                    inventory_document_id,
                     storage_location_id,
-                    quantity_on_hand,
-                    quantity_allocated,
-                    stock_status_id,
+                    item_uom_id,
+                    expected_quantity,
+                    counted_quantity,
+                    count_status,
+                    counted_by_user_id,
+                    validated_by_user_id,
+                    date_counted_utc,
+                    date_validated_utc,
                     date_created_utc,
-                    date_modified_utc
-                FROM forge.stock 
-                WHERE stock_id = @p_record_id
+                    date_updated_utc
+                FROM forge.inventory_count 
+                WHERE inventory_count_id = @p_record_id
                 FOR JSON PATH
             );
 
             -- Generate diff data
             WITH DiffData AS (
                 SELECT 
-                    'item_uom_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].item_uom_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].item_uom_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].item_uom_id') <> JSON_VALUE(@l_data_after, '$[0].item_uom_id')
+                    'inventory_document_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].inventory_document_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].inventory_document_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].inventory_document_id') <> JSON_VALUE(@l_data_after, '$[0].inventory_document_id')
                 UNION ALL
                 SELECT 
                     'storage_location_id' as [field],
@@ -6522,22 +8033,52 @@ BEGIN
                 WHERE JSON_VALUE(@l_data_before, '$[0].storage_location_id') <> JSON_VALUE(@l_data_after, '$[0].storage_location_id')
                 UNION ALL
                 SELECT 
-                    'quantity_on_hand' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].quantity_on_hand') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].quantity_on_hand') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].quantity_on_hand') <> JSON_VALUE(@l_data_after, '$[0].quantity_on_hand')
+                    'item_uom_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].item_uom_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].item_uom_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].item_uom_id') <> JSON_VALUE(@l_data_after, '$[0].item_uom_id')
                 UNION ALL
                 SELECT 
-                    'quantity_allocated' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].quantity_allocated') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].quantity_allocated') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].quantity_allocated') <> JSON_VALUE(@l_data_after, '$[0].quantity_allocated')
+                    'expected_quantity' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].expected_quantity') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].expected_quantity') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].expected_quantity') <> JSON_VALUE(@l_data_after, '$[0].expected_quantity')
                 UNION ALL
                 SELECT 
-                    'stock_status_id' as [field],
-                    JSON_VALUE(@l_data_before, '$[0].stock_status_id') as [old_value],
-                    JSON_VALUE(@l_data_after, '$[0].stock_status_id') as [new_value]
-                WHERE JSON_VALUE(@l_data_before, '$[0].stock_status_id') <> JSON_VALUE(@l_data_after, '$[0].stock_status_id')
+                    'counted_quantity' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].counted_quantity') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].counted_quantity') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].counted_quantity') <> JSON_VALUE(@l_data_after, '$[0].counted_quantity')
+                UNION ALL
+                SELECT 
+                    'count_status' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].count_status') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].count_status') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].count_status') <> JSON_VALUE(@l_data_after, '$[0].count_status')
+                UNION ALL
+                SELECT 
+                    'counted_by_user_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].counted_by_user_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].counted_by_user_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].counted_by_user_id') <> JSON_VALUE(@l_data_after, '$[0].counted_by_user_id')
+                UNION ALL
+                SELECT 
+                    'validated_by_user_id' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].validated_by_user_id') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].validated_by_user_id') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].validated_by_user_id') <> JSON_VALUE(@l_data_after, '$[0].validated_by_user_id')
+                UNION ALL
+                SELECT 
+                    'date_counted_utc' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].date_counted_utc') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].date_counted_utc') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].date_counted_utc') <> JSON_VALUE(@l_data_after, '$[0].date_counted_utc')
+                UNION ALL
+                SELECT 
+                    'date_validated_utc' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].date_validated_utc') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].date_validated_utc') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].date_validated_utc') <> JSON_VALUE(@l_data_after, '$[0].date_validated_utc')
             )
             SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
 
@@ -6547,14 +8088,14 @@ BEGIN
                 @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'stock',
+                @p_object_name = 'inventory_count',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = @l_data_before,
                 @p_data_after = @l_data_after,
                 @p_diff_data = @l_diff_data,
-                @p_message = 'Updated stock',
+                @p_message = 'Updated inventory_count',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -6565,810 +8106,53 @@ BEGIN
             IF @p_record_id IS NULL
                 SET @p_record_id = NEWID();
 
-            INSERT INTO forge.stock
+            INSERT INTO forge.inventory_count
             (
-                stock_id,
-                item_uom_id,
+                inventory_count_id,
+                inventory_document_id,
                 storage_location_id,
-                quantity_on_hand,
-                quantity_allocated,
-                stock_status_id
-            )
-            VALUES
-            (
-                @p_record_id,
-                @p_item_uom_id,
-                @p_storage_location_id,
-                @p_quantity_on_hand,
-                @p_quantity_allocated,
-                @p_stock_status_id
-            );
-
-            -- Capture data after insert
-            SELECT @l_data_after = (
-                SELECT 
-                    stock_id,
-                    item_uom_id,
-                    storage_location_id,
-                    quantity_on_hand,
-                    quantity_allocated,
-                    stock_status_id,
-                    date_created_utc,
-                    date_modified_utc
-                FROM forge.stock 
-                WHERE stock_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            SET @l_action_type_id = 1;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'stock',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = @l_data_after,
-                @p_diff_data = NULL,
-                @p_message = 'Inserted into stock',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-
-    END TRY
-    BEGIN CATCH
-        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
-        DECLARE @l_err_number INT = ERROR_NUMBER();
-        DECLARE @l_err_line INT = ERROR_LINE();
-        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
-        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
-
-        SET @p_return_result_ok = 0;
-        SET @p_return_result_message = CONCAT(
-            'Error: ', @l_err_message,
-            ' (Line ', @l_err_line,
-            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
-            ', Error: ', @l_err_number, ')'
-        );
-
-        SET @l_action_type_id = CASE
-            WHEN @p_is_delete = 1 THEN 3
-            WHEN @l_exists = 1 THEN 2
-            ELSE 1
-        END;
-
-        BEGIN TRY
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_transaction_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'stock',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = @p_return_result_message,
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = NULL;
-        END TRY
-        BEGIN CATCH
-        END CATCH
-    END CATCH
-END;
-GO
-PRINT N'Creating Procedure [forge].[sp_upsert_transfer_order]...';
-
-
-GO
-/***************************************************************************************
-  Procedure: sp_upsert_transfer_order
-  PK: transfer_order_id
-***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_transfer_order
-(
-    @p_record_id UNIQUEIDENTIFIER = NULL,
-    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
-    @p_is_delete BIT = 0,
-
-    -- Table-specific columns
-    @p_order_number VARCHAR(100),
-    @p_transfer_order_type_id INT,
-    @p_status_id INT,
-    @p_source_location_id UNIQUEIDENTIFIER,
-    @p_destination_location_id UNIQUEIDENTIFIER,
-    @p_fill_method_id INT,
-    @p_priority INT,
-    @p_date_expected_utc DATETIME,
-    @p_date_completed_utc DATETIME = NULL,
-
-    -- Outputs
-    @p_return_result_ok BIT OUTPUT,
-    @p_return_result_message NVARCHAR(MAX) OUTPUT
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Default to NONE user if no user ID is provided
-    IF @p_created_by_user_id IS NULL
-        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
-
-    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
-    DECLARE @l_exists BIT = 0;
-    DECLARE @l_action_type_id INT;
-    DECLARE @l_data_before NVARCHAR(MAX);
-    DECLARE @l_data_after NVARCHAR(MAX);
-    DECLARE @l_diff_data NVARCHAR(MAX);
-
-    IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.transfer_order WHERE transfer_order_id = @p_record_id)
-    BEGIN
-        SET @l_exists = 1;
-    END
-
-    BEGIN TRY
-
-        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
-        BEGIN
-            -- Capture data before deletion
-            SELECT @l_data_before = (
-                SELECT 
-                    transfer_order_id,
-                    order_number,
-                    transfer_order_type_id,
-                    transfer_order_status_id,
-                    source_location_id,
-                    destination_location_id,
-                    fill_method_id,
-                    priority,
-                    date_created_utc,
-                    date_expected_utc,
-                    date_completed_utc
-                FROM forge.transfer_order 
-                WHERE transfer_order_id = @p_record_id
-                FOR JSON PATH
-            );
-            
-            DELETE FROM forge.transfer_order
-            WHERE transfer_order_id = @p_record_id;
-
-            SET @l_action_type_id = 3;
-
-            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
-            BEGIN
-                EXEC core.sp_log_transaction
-                    @p_logging_id = @l_log_id,
-                    @p_source_system = 'FORGE',
-                    @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'transfer_order',
-                    @p_object_id = @p_record_id,
-                    @p_action_type_id = @l_action_type_id,
-                    @p_status_code_id = 1,
-                    @p_data_before = @l_data_before,
-                    @p_data_after = NULL,
-                    @p_diff_data = NULL,
-                    @p_message = 'Deleted from transfer_order',
-                    @p_context_id = NULL,
-                    @p_return_result_ok = @p_return_result_ok OUTPUT,
-                    @p_return_result_message = @p_return_result_message OUTPUT,
-                    @p_logging_id_out = @l_log_id OUTPUT;
-            END
-        END
-        ELSE IF @l_exists = 1
-        BEGIN
-            -- Capture data before update
-            SELECT @l_data_before = (
-                SELECT 
-                    transfer_order_id,
-                    order_number,
-                    transfer_order_type_id,
-                    transfer_order_status_id,
-                    source_location_id,
-                    destination_location_id,
-                    fill_method_id,
-                    priority,
-                    date_created_utc,
-                    date_expected_utc,
-                    date_completed_utc
-                FROM forge.transfer_order 
-                WHERE transfer_order_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            UPDATE forge.transfer_order
-            SET
-                order_number = @p_order_number,
-                transfer_order_type_id = @p_transfer_order_type_id,
-                transfer_order_status_id = @p_status_id,
-                source_location_id = @p_source_location_id,
-                destination_location_id = @p_destination_location_id,
-                fill_method_id = @p_fill_method_id,
-                priority = @p_priority,
-                date_expected_utc = @p_date_expected_utc,
-                date_completed_utc = @p_date_completed_utc
-            WHERE transfer_order_id = @p_record_id;
-
-            -- Capture data after update
-            SELECT @l_data_after = (
-                SELECT 
-                    transfer_order_id,
-                    order_number,
-                    transfer_order_type_id,
-                    transfer_order_status_id,
-                    source_location_id,
-                    destination_location_id,
-                    fill_method_id,
-                    priority,
-                    date_created_utc,
-                    date_expected_utc,
-                    date_completed_utc
-                FROM forge.transfer_order 
-                WHERE transfer_order_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            -- Generate diff data
-                WITH DiffData AS (
-                    SELECT 
-                        'order_number' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].order_number') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].order_number') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].order_number') <> JSON_VALUE(@l_data_after, '$[0].order_number')
-                    UNION ALL
-                    SELECT 
-                        'transfer_order_type_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].transfer_order_type_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].transfer_order_type_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].transfer_order_type_id') <> JSON_VALUE(@l_data_after, '$[0].transfer_order_type_id')
-                    UNION ALL
-                    SELECT 
-                        'transfer_order_status_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].transfer_order_status_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].transfer_order_status_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].transfer_order_status_id') <> JSON_VALUE(@l_data_after, '$[0].transfer_order_status_id')
-                    UNION ALL
-                    SELECT 
-                        'source_location_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].source_location_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].source_location_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].source_location_id') <> JSON_VALUE(@l_data_after, '$[0].source_location_id')
-                    UNION ALL
-                    SELECT 
-                        'destination_location_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].destination_location_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].destination_location_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].destination_location_id') <> JSON_VALUE(@l_data_after, '$[0].destination_location_id')
-                    UNION ALL
-                    SELECT 
-                        'fill_method_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].fill_method_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].fill_method_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].fill_method_id') <> JSON_VALUE(@l_data_after, '$[0].fill_method_id')
-                    UNION ALL
-                    SELECT 
-                        'priority' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].priority') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].priority') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].priority') <> JSON_VALUE(@l_data_after, '$[0].priority')
-                    UNION ALL
-                    SELECT 
-                        'date_expected_utc' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].date_expected_utc') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].date_expected_utc') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].date_expected_utc') <> JSON_VALUE(@l_data_after, '$[0].date_expected_utc')
-                    UNION ALL
-                    SELECT 
-                        'date_completed_utc' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].date_completed_utc') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].date_completed_utc') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].date_completed_utc') <> JSON_VALUE(@l_data_after, '$[0].date_completed_utc')
-                )
-                SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH);
-
-            SET @l_action_type_id = 2;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'transfer_order',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = @l_data_after,
-                @p_diff_data = @l_diff_data,
-                @p_message = 'Updated transfer_order',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-        ELSE
-        BEGIN
-            IF @p_record_id IS NULL
-                SET @p_record_id = NEWID();
-
-            INSERT INTO forge.transfer_order
-            (
-                transfer_order_id,
-                order_number,
-                transfer_order_type_id,
-                transfer_order_status_id,
-                source_location_id,
-                destination_location_id,
-                fill_method_id,
-                priority,
-                date_expected_utc,
-                date_completed_utc
-            )
-            VALUES
-            (
-                @p_record_id,
-                @p_order_number,
-                @p_transfer_order_type_id,
-                @p_status_id,
-                @p_source_location_id,
-                @p_destination_location_id,
-                @p_fill_method_id,
-                @p_priority,
-                @p_date_expected_utc,
-                @p_date_completed_utc
-            );
-
-            -- Capture data after insert
-            SELECT @l_data_after = (
-                SELECT 
-                    transfer_order_id,
-                    order_number,
-                    transfer_order_type_id,
-                    transfer_order_status_id,
-                    source_location_id,
-                    destination_location_id,
-                    fill_method_id,
-                    priority,
-                    date_created_utc,
-                    date_expected_utc,
-                    date_completed_utc
-                FROM forge.transfer_order 
-                WHERE transfer_order_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            SET @l_action_type_id = 1;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'transfer_order',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = @l_data_after,
-                @p_diff_data = NULL,
-                @p_message = 'Inserted into transfer_order',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-
-    END TRY
-    BEGIN CATCH
-        DECLARE @l_err_message NVARCHAR(MAX) = ERROR_MESSAGE();
-        DECLARE @l_err_number INT = ERROR_NUMBER();
-        DECLARE @l_err_line INT = ERROR_LINE();
-        DECLARE @l_err_procedure NVARCHAR(128) = ERROR_PROCEDURE();
-        DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
-
-        SET @p_return_result_ok = 0;
-        SET @p_return_result_message = CONCAT(
-            'Error: ', @l_err_message,
-            ' (Line ', @l_err_line,
-            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
-            ', Error: ', @l_err_number, ')'
-        );
-
-        SET @l_action_type_id = CASE
-            WHEN @p_is_delete = 1 THEN 3
-            WHEN @l_exists = 1 THEN 2
-            ELSE 1
-        END;
-
-        BEGIN TRY
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_transaction_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'transfer_order',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,
-                @p_data_before = NULL,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = @p_return_result_message,
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = NULL;
-        END TRY
-        BEGIN CATCH
-        END CATCH
-    END CATCH
-END;
-GO
-PRINT N'Creating Procedure [forge].[sp_upsert_sub_order_line_task]...';
-
-
-GO
-/***************************************************************************************
-  Procedure: sp_upsert_sub_order_line_task
-  PK: task_id
-***************************************************************************************/
-CREATE PROCEDURE forge.sp_upsert_sub_order_line_task
-(
-    @p_record_id UNIQUEIDENTIFIER = NULL,
-    @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
-    @p_is_delete BIT = 0,
-
-    -- Table-specific columns
-    @p_order_line_id UNIQUEIDENTIFIER,
-    @p_movement_type_id INT,
-    @p_item_uom_id UNIQUEIDENTIFIER,
-    @p_quantity DECIMAL(10,2),
-    @p_actual_quantity DECIMAL(10,2),
-    @p_source_location_id UNIQUEIDENTIFIER,
-    @p_destination_location_id UNIQUEIDENTIFIER,
-    @p_task_state_id INT,
-    @p_assigned_to_user_id UNIQUEIDENTIFIER = NULL,
-    @p_priority INT = NULL,
-    @p_validation_type_id INT = NULL,
-    @p_date_assigned_utc DATETIME = NULL,
-    @p_date_started_utc DATETIME = NULL,
-    @p_date_completed_utc DATETIME = NULL,
-    @p_notes VARCHAR(500) = NULL,
-
-    -- Outputs
-    @p_return_result_ok BIT OUTPUT,
-    @p_return_result_message NVARCHAR(MAX) OUTPUT
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Default to NONE user if no user ID is provided
-    IF @p_created_by_user_id IS NULL
-        SET @p_created_by_user_id = '00000000-0000-0000-0000-000000000001'; -- NONE user
-
-    DECLARE @l_log_id UNIQUEIDENTIFIER = NEWID();
-    DECLARE @l_exists BIT = 0;
-    DECLARE @l_action_type_id INT;
-    DECLARE @l_data_before NVARCHAR(MAX);
-    DECLARE @l_data_after NVARCHAR(MAX);
-    DECLARE @l_diff_data NVARCHAR(MAX);
-
-    IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM forge.sub_order_line_task WHERE task_id = @p_record_id)
-    BEGIN
-        SET @l_exists = 1;
-    END
-
-    BEGIN TRY
-
-        IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
-        BEGIN
-            -- Capture data before deletion
-            SELECT @l_data_before = (
-                SELECT 
-                    task_id,
-                    order_line_id,
-                    movement_type_id,
-                    item_uom_id,
-                    quantity,
-                    actual_quantity,
-                    source_location_id,
-                    destination_location_id,
-                    task_state_id,
-                    assigned_to_user_id,
-                    priority,
-                    validation_type_id,
-                    date_created_utc,
-                    date_assigned_utc,
-                    date_started_utc,
-                    date_completed_utc,
-                    notes
-                FROM forge.sub_order_line_task 
-                WHERE task_id = @p_record_id
-                FOR JSON PATH
-            );
-            
-            DELETE FROM forge.sub_order_line_task
-            WHERE task_id = @p_record_id;
-
-            SET @l_action_type_id = 3;
-
-            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
-            BEGIN
-                EXEC core.sp_log_transaction
-                    @p_logging_id = @l_log_id,
-                    @p_source_system = 'FORGE',
-                    @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'sub_order_line_task',
-                    @p_object_id = @p_record_id,
-                    @p_action_type_id = @l_action_type_id,
-                    @p_status_code_id = 1,
-                    @p_data_before = @l_data_before,
-                    @p_data_after = NULL,
-                    @p_diff_data = NULL,
-                    @p_message = 'Deleted from sub_order_line_task',
-                    @p_context_id = NULL,
-                    @p_return_result_ok = @p_return_result_ok OUTPUT,
-                    @p_return_result_message = @p_return_result_message OUTPUT,
-                    @p_logging_id_out = @l_log_id OUTPUT;
-            END
-        END
-        ELSE IF @l_exists = 1
-        BEGIN
-            -- Capture data before update
-            SELECT @l_data_before = (
-                SELECT 
-                    task_id,
-                    order_line_id,
-                    movement_type_id,
-                    item_uom_id,
-                    quantity,
-                    actual_quantity,
-                    source_location_id,
-                    destination_location_id,
-                    task_state_id,
-                    assigned_to_user_id,
-                    priority,
-                    validation_type_id,
-                    date_created_utc,
-                    date_assigned_utc,
-                    date_started_utc,
-                    date_completed_utc,
-                    notes
-                FROM forge.sub_order_line_task 
-                WHERE task_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            UPDATE forge.sub_order_line_task
-            SET
-                order_line_id = @p_order_line_id,
-                movement_type_id = @p_movement_type_id,
-                item_uom_id = @p_item_uom_id,
-                quantity = @p_quantity,
-                actual_quantity = @p_actual_quantity,
-                source_location_id = @p_source_location_id,
-                destination_location_id = @p_destination_location_id,
-                task_state_id = @p_task_state_id,
-                assigned_to_user_id = @p_assigned_to_user_id,
-                priority = @p_priority,
-                validation_type_id = @p_validation_type_id,
-                date_assigned_utc = @p_date_assigned_utc,
-                date_started_utc = @p_date_started_utc,
-                date_completed_utc = @p_date_completed_utc,
-                notes = @p_notes
-            WHERE task_id = @p_record_id;
-
-            -- Capture data after update
-            SELECT @l_data_after = (
-                SELECT 
-                    task_id,
-                    order_line_id,
-                    movement_type_id,
-                    item_uom_id,
-                    quantity,
-                    actual_quantity,
-                    source_location_id,
-                    destination_location_id,
-                    task_state_id,
-                    assigned_to_user_id,
-                    priority,
-                    validation_type_id,
-                    date_created_utc,
-                    date_assigned_utc,
-                    date_started_utc,
-                    date_completed_utc,
-                    notes
-                FROM forge.sub_order_line_task 
-                WHERE task_id = @p_record_id
-                FOR JSON PATH
-            );
-
-            -- Generate diff data
-                WITH DiffData AS (
-                    SELECT 
-                        'order_line_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].order_line_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].order_line_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].order_line_id') <> JSON_VALUE(@l_data_after, '$[0].order_line_id')
-                    UNION ALL
-                    SELECT 
-                        'movement_type_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].movement_type_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].movement_type_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].movement_type_id') <> JSON_VALUE(@l_data_after, '$[0].movement_type_id')
-                    UNION ALL
-                    SELECT 
-                        'item_uom_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].item_uom_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].item_uom_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].item_uom_id') <> JSON_VALUE(@l_data_after, '$[0].item_uom_id')
-                    UNION ALL
-                    SELECT 
-                        'quantity' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].quantity') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].quantity') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].quantity') <> JSON_VALUE(@l_data_after, '$[0].quantity')
-                    UNION ALL
-                    SELECT 
-                        'actual_quantity' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].actual_quantity') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].actual_quantity') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].actual_quantity') <> JSON_VALUE(@l_data_after, '$[0].actual_quantity')
-                    UNION ALL
-                    SELECT 
-                        'source_location_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].source_location_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].source_location_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].source_location_id') <> JSON_VALUE(@l_data_after, '$[0].source_location_id')
-                    UNION ALL
-                    SELECT 
-                        'destination_location_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].destination_location_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].destination_location_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].destination_location_id') <> JSON_VALUE(@l_data_after, '$[0].destination_location_id')
-                    UNION ALL
-                    SELECT 
-                        'task_state_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].task_state_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].task_state_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].task_state_id') <> JSON_VALUE(@l_data_after, '$[0].task_state_id')
-                    UNION ALL
-                    SELECT 
-                        'assigned_to_user_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].assigned_to_user_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].assigned_to_user_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].assigned_to_user_id') <> JSON_VALUE(@l_data_after, '$[0].assigned_to_user_id')
-                    UNION ALL
-                    SELECT 
-                        'priority' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].priority') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].priority') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].priority') <> JSON_VALUE(@l_data_after, '$[0].priority')
-                    UNION ALL
-                    SELECT 
-                        'validation_type_id' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].validation_type_id') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].validation_type_id') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].validation_type_id') <> JSON_VALUE(@l_data_after, '$[0].validation_type_id')
-                    UNION ALL
-                    SELECT 
-                        'date_assigned_utc' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].date_assigned_utc') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].date_assigned_utc') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].date_assigned_utc') <> JSON_VALUE(@l_data_after, '$[0].date_assigned_utc')
-                    UNION ALL
-                    SELECT 
-                        'date_started_utc' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].date_started_utc') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].date_started_utc') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].date_started_utc') <> JSON_VALUE(@l_data_after, '$[0].date_started_utc')
-                    UNION ALL
-                    SELECT 
-                        'date_completed_utc' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].date_completed_utc') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].date_completed_utc') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].date_completed_utc') <> JSON_VALUE(@l_data_after, '$[0].date_completed_utc')
-                    UNION ALL
-                    SELECT 
-                        'notes' as [field],
-                        JSON_VALUE(@l_data_before, '$[0].notes') as [old_value],
-                        JSON_VALUE(@l_data_after, '$[0].notes') as [new_value]
-                    WHERE JSON_VALUE(@l_data_before, '$[0].notes') <> JSON_VALUE(@l_data_after, '$[0].notes')
-                )
-               SELECT @l_diff_data = (  SELECT * FROM DiffData FOR JSON PATH);
-
-            SET @l_action_type_id = 2;
-
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'sub_order_line_task',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = @l_data_after,
-                @p_diff_data = @l_diff_data,
-                @p_message = 'Updated sub_order_line_task',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
-        END
-        ELSE
-        BEGIN
-            IF @p_record_id IS NULL
-                SET @p_record_id = NEWID();
-
-            INSERT INTO forge.sub_order_line_task
-            (
-                task_id,
-                order_line_id,
-                movement_type_id,
                 item_uom_id,
-                quantity,
-                actual_quantity,
-                source_location_id,
-                destination_location_id,
-                task_state_id,
-                assigned_to_user_id,
-                priority,
-                validation_type_id,
-                date_assigned_utc,
-                date_started_utc,
-                date_completed_utc,
-                notes
+                expected_quantity,
+                counted_quantity,
+                count_status,
+                counted_by_user_id,
+                validated_by_user_id,
+                date_counted_utc,
+                date_validated_utc
             )
             VALUES
             (
                 @p_record_id,
-                @p_order_line_id,
-                @p_movement_type_id,
+                @p_inventory_document_id,
+                @p_storage_location_id,
                 @p_item_uom_id,
-                @p_quantity,
-                @p_actual_quantity,
-                @p_source_location_id,
-                @p_destination_location_id,
-                @p_task_state_id,
-                @p_assigned_to_user_id,
-                @p_priority,
-                @p_validation_type_id,
-                @p_date_assigned_utc,
-                @p_date_started_utc,
-                @p_date_completed_utc,
-                @p_notes
+                @p_expected_quantity,
+                @p_counted_quantity,
+                @p_count_status,
+                @p_counted_by_user_id,
+                @p_validated_by_user_id,
+                @p_date_counted_utc,
+                @p_date_validated_utc
             );
 
             -- Capture data after insert
             SELECT @l_data_after = (
                 SELECT 
-                    task_id,
-                    order_line_id,
-                    movement_type_id,
+                    inventory_count_id,
+                    inventory_document_id,
+                    storage_location_id,
                     item_uom_id,
-                    quantity,
-                    actual_quantity,
-                    source_location_id,
-                    destination_location_id,
-                    task_state_id,
-                    assigned_to_user_id,
-                    priority,
-                    validation_type_id,
+                    expected_quantity,
+                    counted_quantity,
+                    count_status,
+                    counted_by_user_id,
+                    validated_by_user_id,
+                    date_counted_utc,
+                    date_validated_utc,
                     date_created_utc,
-                    date_assigned_utc,
-                    date_started_utc,
-                    date_completed_utc,
-                    notes
-                FROM forge.sub_order_line_task 
-                WHERE task_id = @p_record_id
+                    date_updated_utc
+                FROM forge.inventory_count 
+                WHERE inventory_count_id = @p_record_id
                 FOR JSON PATH
             );
 
@@ -7378,14 +8162,14 @@ BEGIN
                 @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'sub_order_line_task',
+                @p_object_name = 'inventory_count',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 1,
                 @p_data_before = NULL,
                 @p_data_after = @l_data_after,
                 @p_diff_data = NULL,
-                @p_message = 'Inserted into sub_order_line_task',
+                @p_message = 'Inserted into inventory_count',
                 @p_context_id = NULL,
                 @p_return_result_ok = @p_return_result_ok OUTPUT,
                 @p_return_result_message = @p_return_result_message OUTPUT,
@@ -7419,7 +8203,7 @@ BEGIN
                 @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'sub_order_line_task',
+                @p_object_name = 'inventory_count',
                 @p_object_id = @p_record_id,
                 @p_action_type_id = @l_action_type_id,
                 @p_status_code_id = 2,

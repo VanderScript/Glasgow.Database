@@ -60,7 +60,7 @@ BEGIN
             IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
             BEGIN
                 EXEC core.sp_log_transaction
-                    @p_transaction_log_id = @l_log_id,
+                    @p_logging_id = @l_log_id,
                     @p_source_system = 'FORGE',
                     @p_user_id = @p_created_by_user_id,
                     @p_object_name = 'fulfillment_method',
@@ -126,7 +126,7 @@ BEGIN
             SET @l_action_type_id = 2;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'fulfillment_method',
@@ -174,7 +174,7 @@ BEGIN
             SET @l_action_type_id = 1;
 
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_log_id,
+                @p_logging_id = @l_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'fulfillment_method',
@@ -211,7 +211,7 @@ BEGIN
 
         BEGIN TRY
             EXEC core.sp_log_transaction
-                @p_transaction_log_id = @l_transaction_log_id,
+                @p_logging_id = @l_transaction_log_id,
                 @p_source_system = 'FORGE',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'fulfillment_method',
