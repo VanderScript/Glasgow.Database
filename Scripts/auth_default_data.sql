@@ -31,11 +31,15 @@ GO
 -- These users are pre-defined with specific GUIDs to ensure consistency
 -- Note: user_id has DEFAULT NEWID(), but we override for system users
 ------------------------------------------------------------
-INSERT INTO auth.users (user_id, username, password_hash, password_salt) VALUES
--- NONE user - represents no user or anonymous access
-('00000000-0000-0000-0000-000000000001', 'NONE', 
- 'SystemUserNoPasswordHash', 'SystemUserNoPasswordSalt'),
--- SYSTEM user - represents system operations
-('00000000-0000-0000-0000-000000000002', 'SYSTEM', 
- 'SystemUserNoPasswordHash', 'SystemUserNoPasswordSalt');
+INSERT INTO auth.users 
+    ([user_id], [username], [password_hash], [password_salt], [email], [email_verified], [is_active], [date_created_utc], [date_updated_utc]) 
+VALUES
+    -- NONE user - represents no user or anonymous access
+    ('00000000-0000-0000-0000-000000000001', 'NONE', 
+     'SystemUserNoPasswordHash', 'SystemUserNoPasswordSalt',
+     NULL, 0, 1, GETUTCDATE(), GETUTCDATE()),
+    -- SYSTEM user - represents system operations
+    ('00000000-0000-0000-0000-000000000002', 'SYSTEM', 
+     'SystemUserNoPasswordHash', 'SystemUserNoPasswordSalt',
+     NULL, 0, 1, GETUTCDATE(), GETUTCDATE());
 GO 

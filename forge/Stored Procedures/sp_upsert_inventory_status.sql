@@ -222,8 +222,8 @@ BEGIN
                 @p_diff_data = NULL,
                 @p_message = @p_return_result_message,
                 @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
+                @p_return_result_ok = NULL,
+                @p_return_result_message = NULL,
                 @p_logging_id_out = NULL;
         END TRY
         BEGIN CATCH

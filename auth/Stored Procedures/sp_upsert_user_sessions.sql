@@ -10,10 +10,14 @@ CREATE PROCEDURE auth.sp_upsert_user_sessions
 
     -- Table-specific columns
     @p_user_id UNIQUEIDENTIFIER,
-    @p_session_token VARCHAR(2000),
-    @p_refresh_token VARCHAR(244),
-    @p_date_expires_utc DATETIME,
-    @p_date_created_utc DATETIME = NULL, -- Optional, will default to GETUTCDATE() for new records
+    @p_session_token VARCHAR(4000),
+    @p_refresh_token VARCHAR(4000) = NULL,
+    @p_token_type VARCHAR(50) = 'Bearer',
+    @p_scope VARCHAR(1000) = NULL,
+    @p_id_token VARCHAR(4000) = NULL,
+    @p_identity_provider VARCHAR(50) = NULL,
+    @p_date_expires_utc DATETIME2,
+    @p_date_created_utc DATETIME2 = NULL, -- Optional, will default to GETUTCDATE() for new records
 
     -- Outputs
     @p_return_result_ok BIT OUTPUT,
@@ -37,31 +41,20 @@ BEGIN
     DECLARE @l_data_before NVARCHAR(MAX) = NULL;
     DECLARE @l_data_after NVARCHAR(MAX) = NULL;
     DECLARE @l_diff_data NVARCHAR(MAX) = NULL;
+    DECLARE @l_current_time DATETIME2 = GETUTCDATE();
 
     IF @p_record_id IS NOT NULL
-       AND EXISTS(SELECT 1 FROM auth.user_sessions WHERE session_id = @p_record_id)
+       AND EXISTS(SELECT 1 FROM auth.user_sessions WHERE [session_id] = @p_record_id)
     BEGIN
         SET @l_exists = 1;
     END
 
     BEGIN TRY
-        -- Validate foreign key constraint
-        IF NOT EXISTS (SELECT 1 FROM auth.users WHERE user_id = @p_user_id)
-        BEGIN
-            THROW 51000, 'The specified user_id does not exist in the users table.', 1;
-        END
-
         IF @p_is_delete = 1 AND @p_record_id IS NOT NULL AND @l_exists = 1
         BEGIN
             -- Capture data before delete
             SELECT @l_data_before = (
-                SELECT 
-                    session_id,
-                    user_id,
-                    session_token,
-                    refresh_token,
-                    date_expires_utc,
-                    date_created_utc
+                SELECT *
                 FROM auth.user_sessions 
                 WHERE session_id = @p_record_id
                 FOR JSON PATH
@@ -93,13 +86,7 @@ BEGIN
         BEGIN
             -- Capture data before update
             SELECT @l_data_before = (
-                SELECT 
-                    session_id,
-                    user_id,
-                    session_token,
-                    refresh_token,
-                    date_expires_utc,
-                    date_created_utc
+                SELECT *
                 FROM auth.user_sessions 
                 WHERE session_id = @p_record_id
                 FOR JSON PATH
@@ -110,19 +97,18 @@ BEGIN
                 user_id = @p_user_id,
                 session_token = @p_session_token,
                 refresh_token = @p_refresh_token,
+                token_type = @p_token_type,
+                scope = @p_scope,
+                id_token = @p_id_token,
+                identity_provider = @p_identity_provider,
                 date_expires_utc = @p_date_expires_utc,
-                date_created_utc = @p_date_created_utc
+                date_created_utc = @p_date_created_utc,
+                date_updated_utc = @l_current_time
             WHERE session_id = @p_record_id;
 
             -- Capture data after update
             SELECT @l_data_after = (
-                SELECT 
-                    session_id,
-                    user_id,
-                    session_token,
-                    refresh_token,
-                    date_expires_utc,
-                    date_created_utc
+                SELECT *
                 FROM auth.user_sessions 
                 WHERE session_id = @p_record_id
                 FOR JSON PATH
@@ -135,30 +121,72 @@ BEGIN
                     CAST(JSON_VALUE(@l_data_before, '$[0].user_id') AS VARCHAR(36)) as [old_value],
                     CAST(JSON_VALUE(@l_data_after, '$[0].user_id') AS VARCHAR(36)) as [new_value]
                 WHERE JSON_VALUE(@l_data_before, '$[0].user_id') <> JSON_VALUE(@l_data_after, '$[0].user_id')
+                   OR (JSON_VALUE(@l_data_before, '$[0].user_id') IS NULL AND JSON_VALUE(@l_data_after, '$[0].user_id') IS NOT NULL)
+                   OR (JSON_VALUE(@l_data_before, '$[0].user_id') IS NOT NULL AND JSON_VALUE(@l_data_after, '$[0].user_id') IS NULL)
                 UNION ALL
                 SELECT 
                     'session_token' as [field],
                     JSON_VALUE(@l_data_before, '$[0].session_token') as [old_value],
                     JSON_VALUE(@l_data_after, '$[0].session_token') as [new_value]
                 WHERE JSON_VALUE(@l_data_before, '$[0].session_token') <> JSON_VALUE(@l_data_after, '$[0].session_token')
+                   OR (JSON_VALUE(@l_data_before, '$[0].session_token') IS NULL AND JSON_VALUE(@l_data_after, '$[0].session_token') IS NOT NULL)
+                   OR (JSON_VALUE(@l_data_before, '$[0].session_token') IS NOT NULL AND JSON_VALUE(@l_data_after, '$[0].session_token') IS NULL)
                 UNION ALL
                 SELECT 
                     'refresh_token' as [field],
                     JSON_VALUE(@l_data_before, '$[0].refresh_token') as [old_value],
                     JSON_VALUE(@l_data_after, '$[0].refresh_token') as [new_value]
                 WHERE JSON_VALUE(@l_data_before, '$[0].refresh_token') <> JSON_VALUE(@l_data_after, '$[0].refresh_token')
+                   OR (JSON_VALUE(@l_data_before, '$[0].refresh_token') IS NULL AND JSON_VALUE(@l_data_after, '$[0].refresh_token') IS NOT NULL)
+                   OR (JSON_VALUE(@l_data_before, '$[0].refresh_token') IS NOT NULL AND JSON_VALUE(@l_data_after, '$[0].refresh_token') IS NULL)
+                UNION ALL
+                SELECT 
+                    'token_type' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].token_type') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].token_type') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].token_type') <> JSON_VALUE(@l_data_after, '$[0].token_type')
+                   OR (JSON_VALUE(@l_data_before, '$[0].token_type') IS NULL AND JSON_VALUE(@l_data_after, '$[0].token_type') IS NOT NULL)
+                   OR (JSON_VALUE(@l_data_before, '$[0].token_type') IS NOT NULL AND JSON_VALUE(@l_data_after, '$[0].token_type') IS NULL)
+                UNION ALL
+                SELECT 
+                    'scope' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].scope') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].scope') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].scope') <> JSON_VALUE(@l_data_after, '$[0].scope')
+                   OR (JSON_VALUE(@l_data_before, '$[0].scope') IS NULL AND JSON_VALUE(@l_data_after, '$[0].scope') IS NOT NULL)
+                   OR (JSON_VALUE(@l_data_before, '$[0].scope') IS NOT NULL AND JSON_VALUE(@l_data_after, '$[0].scope') IS NULL)
+                UNION ALL
+                SELECT 
+                    'id_token' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].id_token') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].id_token') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].id_token') <> JSON_VALUE(@l_data_after, '$[0].id_token')
+                   OR (JSON_VALUE(@l_data_before, '$[0].id_token') IS NULL AND JSON_VALUE(@l_data_after, '$[0].id_token') IS NOT NULL)
+                   OR (JSON_VALUE(@l_data_before, '$[0].id_token') IS NOT NULL AND JSON_VALUE(@l_data_after, '$[0].id_token') IS NULL)
+                UNION ALL
+                SELECT 
+                    'identity_provider' as [field],
+                    JSON_VALUE(@l_data_before, '$[0].identity_provider') as [old_value],
+                    JSON_VALUE(@l_data_after, '$[0].identity_provider') as [new_value]
+                WHERE JSON_VALUE(@l_data_before, '$[0].identity_provider') <> JSON_VALUE(@l_data_after, '$[0].identity_provider')
+                   OR (JSON_VALUE(@l_data_before, '$[0].identity_provider') IS NULL AND JSON_VALUE(@l_data_after, '$[0].identity_provider') IS NOT NULL)
+                   OR (JSON_VALUE(@l_data_before, '$[0].identity_provider') IS NOT NULL AND JSON_VALUE(@l_data_after, '$[0].identity_provider') IS NULL)
                 UNION ALL
                 SELECT 
                     'date_expires_utc' as [field],
                     CAST(JSON_VALUE(@l_data_before, '$[0].date_expires_utc') AS VARCHAR(50)) as [old_value],
                     CAST(JSON_VALUE(@l_data_after, '$[0].date_expires_utc') AS VARCHAR(50)) as [new_value]
                 WHERE JSON_VALUE(@l_data_before, '$[0].date_expires_utc') <> JSON_VALUE(@l_data_after, '$[0].date_expires_utc')
+                   OR (JSON_VALUE(@l_data_before, '$[0].date_expires_utc') IS NULL AND JSON_VALUE(@l_data_after, '$[0].date_expires_utc') IS NOT NULL)
+                   OR (JSON_VALUE(@l_data_before, '$[0].date_expires_utc') IS NOT NULL AND JSON_VALUE(@l_data_after, '$[0].date_expires_utc') IS NULL)
                 UNION ALL
                 SELECT 
                     'date_created_utc' as [field],
                     CAST(JSON_VALUE(@l_data_before, '$[0].date_created_utc') AS VARCHAR(50)) as [old_value],
                     CAST(JSON_VALUE(@l_data_after, '$[0].date_created_utc') AS VARCHAR(50)) as [new_value]
                 WHERE JSON_VALUE(@l_data_before, '$[0].date_created_utc') <> JSON_VALUE(@l_data_after, '$[0].date_created_utc')
+                   OR (JSON_VALUE(@l_data_before, '$[0].date_created_utc') IS NULL AND JSON_VALUE(@l_data_after, '$[0].date_created_utc') IS NOT NULL)
+                   OR (JSON_VALUE(@l_data_before, '$[0].date_created_utc') IS NOT NULL AND JSON_VALUE(@l_data_after, '$[0].date_created_utc') IS NULL)
             )
             SELECT @l_diff_data = ( SELECT * FROM DiffData FOR JSON PATH );
 
@@ -189,16 +217,26 @@ BEGIN
                 user_id,
                 session_token,
                 refresh_token,
+                token_type,
+                scope,
+                id_token,
+                identity_provider,
                 date_expires_utc,
-                date_created_utc
+                date_created_utc,
+                date_updated_utc
             )
             VALUES
             (
                 @p_user_id,
                 @p_session_token,
                 @p_refresh_token,
+                @p_token_type,
+                @p_scope,
+                @p_id_token,
+                @p_identity_provider,
                 @p_date_expires_utc,
-                @p_date_created_utc
+                @p_date_created_utc,
+                @l_current_time
             );
 
             -- Get the generated session_id for logging
@@ -206,13 +244,7 @@ BEGIN
 
             -- Capture data after insert
             SELECT @l_data_after = (
-                SELECT 
-                    session_id,
-                    user_id,
-                    session_token,
-                    refresh_token,
-                    date_expires_utc,
-                    date_created_utc
+                SELECT *
                 FROM auth.user_sessions 
                 WHERE session_id = @p_record_id
                 FOR JSON PATH
@@ -249,12 +281,7 @@ BEGIN
         DECLARE @l_transaction_log_id UNIQUEIDENTIFIER = NEWID();
 
         SET @p_return_result_ok = 0;
-        SET @p_return_result_message = CONCAT(
-            'Error: ', @l_err_message,
-            ' (Line ', @l_err_line,
-            ', Procedure: ', ISNULL(@l_err_procedure,'N/A'),
-            ', Error: ', @l_err_number, ')'
-        );
+        SET @p_return_result_message = @l_err_message;
 
         EXEC core.sp_log_transaction
             @p_logging_id = @l_transaction_log_id,
@@ -262,17 +289,15 @@ BEGIN
             @p_user_id = @p_created_by_user_id,
             @p_object_name = 'user_sessions',
             @p_object_id = @p_record_id,
-            @p_action_type_id = 4, -- Error
-            @p_status_code_id = 2, -- Error
-            @p_data_before = NULL,
-            @p_data_after = NULL,
-            @p_diff_data = NULL,
-            @p_message = @p_return_result_message,
+            @p_action_type_id = @l_action_type_id,
+            @p_status_code_id = 2,
+            @p_data_before = @l_data_before,
+            @p_data_after = @l_data_after,
+            @p_diff_data = @l_diff_data,
+            @p_message = @l_err_message,
             @p_context_id = NULL,
-            @p_return_result_ok = @p_return_result_ok OUTPUT,
-            @p_return_result_message = @p_return_result_message OUTPUT,
+            @p_return_result_ok = NULL,
+            @p_return_result_message = NULL,
             @p_logging_id_out = @l_transaction_log_id OUTPUT;
-
-        THROW;
-    END CATCH
+    END CATCH;
 END; 
