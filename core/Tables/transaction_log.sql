@@ -5,7 +5,7 @@
     [user_id]            UNIQUEIDENTIFIER NULL,
     [event_timestamp]    DATETIME         DEFAULT (getutcdate()) NOT NULL,
     [object_name]        VARCHAR (100)    NOT NULL,
-    [object_id]          UNIQUEIDENTIFIER NULL,
+    [object_id]          NVARCHAR (100) NULL,
     [action_type_id]     INT              NULL,
     [status_code_id]     INT              NULL,
     [data_before]        NVARCHAR (MAX)   NULL,

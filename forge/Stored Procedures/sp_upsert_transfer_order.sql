@@ -7,6 +7,7 @@ CREATE PROCEDURE forge.sp_upsert_transfer_order
     @p_record_id UNIQUEIDENTIFIER = NULL,
     @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
+    @p_donot_log BIT = 0,
 
     -- Table-specific columns
     @p_order_number VARCHAR(100),
@@ -72,11 +73,11 @@ BEGIN
 
             SET @l_action_type_id = 3;
 
-            IF @l_data_before IS NOT NULL AND @l_data_before != '[]'
+            IF @p_donot_log = 0 AND @l_data_before IS NOT NULL AND @l_data_before != '[]'
             BEGIN
                 EXEC core.sp_log_transaction
                     @p_logging_id = @l_log_id,
-                    @p_source_system = 'FORGE',
+                    @p_source_system = '[forge].[sp_upsert_transfer_order]',
                     @p_user_id = @p_created_by_user_id,
                     @p_object_name = 'transfer_order',
                     @p_object_id = @p_record_id,
@@ -205,22 +206,25 @@ BEGIN
 
             SET @l_action_type_id = 2;
 
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'transfer_order',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = @l_data_after,
-                @p_diff_data = @l_diff_data,
-                @p_message = 'Updated transfer_order',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
+            IF @p_donot_log = 0
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = '[forge].[sp_upsert_transfer_order]',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'transfer_order',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = @l_data_after,
+                    @p_diff_data = @l_diff_data,
+                    @p_message = 'Updated transfer_order',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
         ELSE
         BEGIN
@@ -275,22 +279,25 @@ BEGIN
 
             SET @l_action_type_id = 1;
 
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'FORGE',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'transfer_order',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = @l_data_after,
-                @p_diff_data = NULL,
-                @p_message = 'Inserted into transfer_order',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
+            IF @p_donot_log = 0
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = '[forge].[sp_upsert_transfer_order]',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'transfer_order',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = NULL,
+                    @p_data_after = @l_data_after,
+                    @p_diff_data = NULL,
+                    @p_message = 'Inserted into transfer_order',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
 
     END TRY
@@ -315,15 +322,16 @@ BEGIN
             ELSE 1
         END;
 
-        BEGIN TRY
+        IF @p_donot_log = 0
+        BEGIN
             EXEC core.sp_log_transaction
                 @p_logging_id = @l_transaction_log_id,
-                @p_source_system = 'FORGE',
+                @p_source_system = '[forge].[sp_upsert_transfer_order]',
                 @p_user_id = @p_created_by_user_id,
                 @p_object_name = 'transfer_order',
                 @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 2,
+                @p_action_type_id = @l_action_type_id, -- Error
+                @p_status_code_id = 2, -- Error
                 @p_data_before = NULL,
                 @p_data_after = NULL,
                 @p_diff_data = NULL,
@@ -331,9 +339,7 @@ BEGIN
                 @p_context_id = NULL,
                 @p_return_result_ok = NULL,
                 @p_return_result_message = NULL,
-                @p_logging_id_out = NULL;
-        END TRY
-        BEGIN CATCH
-        END CATCH
+                @p_logging_id_out = @l_transaction_log_id OUTPUT;
+        END
     END CATCH
 END;

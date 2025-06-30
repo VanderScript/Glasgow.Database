@@ -7,6 +7,7 @@ CREATE PROCEDURE auth.sp_upsert_claim_list
     @p_record_id INT = NULL,
     @p_created_by_user_id UNIQUEIDENTIFIER = NULL,
     @p_is_delete BIT = 0,
+    @p_donot_log BIT = 0,
 
     -- Table-specific columns
     @p_claim_name VARCHAR(32),
@@ -45,23 +46,25 @@ BEGIN
                 SET @p_return_result_ok = 0;
                 SET @p_return_result_message = 'Cannot delete claim because it is referenced by role_claim_mapping records.';
 
-                EXEC core.sp_log_transaction
-                    @p_logging_id = @l_log_id,
-                    @p_source_system = 'AUTH',
-                    @p_user_id = @p_created_by_user_id,
-                    @p_object_name = 'claim_list',
-                    @p_object_id = @p_record_id,
-                    @p_action_type_id = 4, -- Error
-                    @p_status_code_id = 2, -- Error
-                    @p_data_before = NULL,
-                    @p_data_after = NULL,
-                    @p_diff_data = NULL,
-                    @p_message = @p_return_result_message,
-                    @p_context_id = NULL,
-                    @p_return_result_ok = @p_return_result_ok OUTPUT,
-                    @p_return_result_message = @p_return_result_message OUTPUT,
-                    @p_logging_id_out = @l_log_id OUTPUT;
-
+                IF @p_donot_log = 0
+                BEGIN
+                    EXEC core.sp_log_transaction
+                        @p_logging_id = @l_log_id,
+                        @p_source_system = '[auth].[sp_upsert_claim_list]',
+                        @p_user_id = @p_created_by_user_id,
+                        @p_object_name = 'claim_list',
+                        @p_object_id = @p_record_id,
+                        @p_action_type_id = 4, -- Error
+                        @p_status_code_id = 2, -- Error
+                        @p_data_before = NULL,
+                        @p_data_after = NULL,
+                        @p_diff_data = NULL,
+                        @p_message = @p_return_result_message,
+                        @p_context_id = NULL,
+                        @p_return_result_ok = @p_return_result_ok OUTPUT,
+                        @p_return_result_message = @p_return_result_message OUTPUT,
+                        @p_logging_id_out = @l_log_id OUTPUT;
+                END
                 RETURN;
             END
 
@@ -80,22 +83,25 @@ BEGIN
 
             SET @l_action_type_id = 3;
 
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'AUTH',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'claim_list',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = NULL,
-                @p_diff_data = NULL,
-                @p_message = 'Deleted from claim_list',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
+            IF @p_donot_log = 0
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = '[auth].[sp_upsert_claim_list]',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'claim_list',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = NULL,
+                    @p_diff_data = NULL,
+                    @p_message = 'Deleted from claim_list',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
         ELSE IF @l_exists = 1
         BEGIN
@@ -138,22 +144,25 @@ BEGIN
 
             SET @l_action_type_id = 2;
 
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'AUTH',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'claim_list',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = @l_data_before,
-                @p_data_after = @l_data_after,
-                @p_diff_data = @l_diff_data,
-                @p_message = 'Updated claim_list',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
+            IF @p_donot_log = 0
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = '[auth].[sp_upsert_claim_list]',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'claim_list',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = @l_data_before,
+                    @p_data_after = @l_data_after,
+                    @p_diff_data = @l_diff_data,
+                    @p_message = 'Updated claim_list',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
         ELSE
         BEGIN
@@ -182,22 +191,25 @@ BEGIN
 
             SET @l_action_type_id = 1;
 
-            EXEC core.sp_log_transaction
-                @p_logging_id = @l_log_id,
-                @p_source_system = 'AUTH',
-                @p_user_id = @p_created_by_user_id,
-                @p_object_name = 'claim_list',
-                @p_object_id = @p_record_id,
-                @p_action_type_id = @l_action_type_id,
-                @p_status_code_id = 1,
-                @p_data_before = NULL,
-                @p_data_after = @l_data_after,
-                @p_diff_data = NULL,
-                @p_message = 'Inserted into claim_list',
-                @p_context_id = NULL,
-                @p_return_result_ok = @p_return_result_ok OUTPUT,
-                @p_return_result_message = @p_return_result_message OUTPUT,
-                @p_logging_id_out = @l_log_id OUTPUT;
+            IF @p_donot_log = 0
+            BEGIN
+                EXEC core.sp_log_transaction
+                    @p_logging_id = @l_log_id,
+                    @p_source_system = '[auth].[sp_upsert_claim_list]',
+                    @p_user_id = @p_created_by_user_id,
+                    @p_object_name = 'claim_list',
+                    @p_object_id = @p_record_id,
+                    @p_action_type_id = @l_action_type_id,
+                    @p_status_code_id = 1,
+                    @p_data_before = NULL,
+                    @p_data_after = @l_data_after,
+                    @p_diff_data = NULL,
+                    @p_message = 'Inserted into claim_list',
+                    @p_context_id = NULL,
+                    @p_return_result_ok = @p_return_result_ok OUTPUT,
+                    @p_return_result_message = @p_return_result_message OUTPUT,
+                    @p_logging_id_out = @l_log_id OUTPUT;
+            END
         END
 
         SET @p_return_result_ok = 1;
@@ -218,23 +230,24 @@ BEGIN
             ', Error: ', @l_err_number, ')'
         );
 
-        EXEC core.sp_log_transaction
-            @p_logging_id = @l_transaction_log_id,
-            @p_source_system = 'AUTH',
-            @p_user_id = @p_created_by_user_id,
-            @p_object_name = 'claim_list',
-            @p_object_id = @p_record_id,
-            @p_action_type_id = 4, -- Error
-            @p_status_code_id = 2, -- Error
-            @p_data_before = NULL,
-            @p_data_after = NULL,
-            @p_diff_data = NULL,
-            @p_message = @p_return_result_message,
-            @p_context_id = NULL,
-            @p_return_result_ok = NULL,
-            @p_return_result_message = NULL,
-            @p_logging_id_out = @l_transaction_log_id OUTPUT;
-
-        THROW;
+        IF @p_donot_log = 0
+        BEGIN
+            EXEC core.sp_log_transaction
+                @p_logging_id = @l_transaction_log_id,
+                @p_source_system = '[auth].[sp_upsert_claim_list]',
+                @p_user_id = @p_created_by_user_id,
+                @p_object_name = 'claim_list',
+                @p_object_id = @p_record_id,
+                @p_action_type_id = 4, -- Error
+                @p_status_code_id = 2, -- Error
+                @p_data_before = NULL,
+                @p_data_after = NULL,
+                @p_diff_data = NULL,
+                @p_message = @p_return_result_message,
+                @p_context_id = NULL,
+                @p_return_result_ok = NULL,
+                @p_return_result_message = NULL,
+                @p_logging_id_out = @l_transaction_log_id OUTPUT;
+        END
     END CATCH
 END; 

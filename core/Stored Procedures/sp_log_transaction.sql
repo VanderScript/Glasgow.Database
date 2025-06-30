@@ -3,7 +3,7 @@
     @p_source_system VARCHAR(50),
     @p_user_id UNIQUEIDENTIFIER = NULL,
     @p_object_name VARCHAR(100),
-    @p_object_id UNIQUEIDENTIFIER = NULL,
+    @p_object_id NVARCHAR (100) = NULL,
     @p_action_type_id INT,
     @p_status_code_id INT,
     @p_data_before NVARCHAR(MAX) = NULL,
